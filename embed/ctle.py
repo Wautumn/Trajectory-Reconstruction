@@ -24,7 +24,7 @@ def gen_casual_mask(seq_len, include_self=True):
     """
     Generate a casual mask which prevents i-th output element from
     depending on any input elements from "the future".
-    Note that for PyTorch Transformer model, sequence mask should be
+    Note that for PyTorch Transformer embed, sequence mask should be
     filled with -inf for the masked positions, and 0.0 else.
 
     :param seq_len: length of sequence.
@@ -61,13 +61,13 @@ class CTLEEmbedding(nn.Module):
     position embedding  and token embedding
     """
 
-    def __init__(self, encoding_layer, embed_size, num_vocab):
+    def __init__(self, encoding_layer, embed_size, num_loc):
         super().__init__()
         self.embed_size = embed_size
-        self.num_vocab = num_vocab
+        self.num_loc = num_loc
         self.encoding_layer = encoding_layer
         self.add_module('encoding', self.encoding_layer)
-        self.token_embed = nn.Embedding(num_vocab + 2, embed_size, padding_idx=num_vocab)
+        self.token_embed = nn.Embedding(num_loc + 2, embed_size, padding_idx=num_loc)
 
     def forward(self, x, **kwargs):
         token_embed = self.token_embed(x)
@@ -79,7 +79,7 @@ class CTLE(nn.Module):
     def __init__(self, embed, hidden_size, num_layers, num_heads, init_param=False, detach=True):
         super().__init__()
         self.embed_size = embed.embed_size
-        self.num_vocab = embed.num_vocab
+        self.num_loc = embed.num_loc
 
         self.embed = embed
         self.add_module('embed', embed)
@@ -97,7 +97,7 @@ class CTLE(nn.Module):
         seq_len = x.size(1)
         downstream = kwargs.get('downstream', False)
 
-        src_key_padding_mask = (x == self.num_vocab)
+        src_key_padding_mask = (x == self.num_loc)
         token_embed = self.embed(x, **kwargs)  # (batch_size, seq_len, embed_size)
         if downstream:
             pre_len = kwargs['pre_len']
@@ -118,7 +118,7 @@ class CTLE(nn.Module):
         return encoder_out
 
     def static_embed(self):
-        return self.embed.token_embed.weight[:self.num_vocab].detach().cpu().numpy()
+        return self.embed.token_embed.weight[:self.num_loc].detach().cpu().numpy()
 
 
 class MaskedLM(nn.Module):
@@ -146,45 +146,37 @@ class MaskedLM(nn.Module):
 def train_ctle(dataset, ctle_model: CTLE, obj_models, mask_prop, num_epoch, batch_size, device):
     ctle_model = ctle_model.to(device)
     obj_models = obj_models.to(device)
-    user_ids, src_tokens, src_weekdays, src_ts, src_lens = zip(*dataset.gen_sequence())
+    user_ids, src_trajectory, src_ts, src_lens = zip(*dataset.gen_sequence())
 
     optimizer = torch.optim.Adam(list(ctle_model.parameters()) + list(obj_models.parameters()), lr=1e-4)
     for epoch in range(num_epoch):
         running_loss = 0
-        for batch in next_batch(shuffle(list(zip(src_tokens, src_weekdays, src_ts, src_lens))), batch_size=batch_size):
+        for batch in next_batch(shuffle(list(zip(src_trajectory, src_ts, src_lens))), batch_size=batch_size):
             # Value filled with num_loc stands for masked tokens that shouldn't be considered.
-            src_batch, _, src_t_batch, src_len_batch = zip(*batch)
-            src_batch = np.transpose(np.array(list(zip_longest(*src_batch, fillvalue=ctle_model.num_vocab))))
+            src_batch, src_t_batch, src_len_batch = zip(*batch)
+            src_batch = np.transpose(np.array(list(zip_longest(*src_batch, fillvalue=ctle_model.num_loc))))
             src_t_batch = np.transpose(np.array(list(zip_longest(*src_t_batch, fillvalue=0))))
-
             src_batch = torch.tensor(src_batch).long().to(device)
-            src_t_batch = torch.tensor(src_t_batch).float().to(device)
-            hour_batch = (src_t_batch % (24 * 60 * 60) / 60 / 60).long()
-
             batch_len, src_len = src_batch.size(0), src_batch.size(1)
             src_valid_len = torch.tensor(src_len_batch).long().to(device)
 
             mask_index = gen_random_mask(src_valid_len, src_len, mask_prop=mask_prop)
-
             src_batch = src_batch.reshape(-1)
-            hour_batch = hour_batch.reshape(-1)
             origin_tokens = src_batch[mask_index]  # (num_masked)
-            origin_hour = hour_batch[mask_index]
 
             # Value filled with num_loc+1 stands for special token <mask>.
-            masked_tokens = src_batch.index_fill(0, mask_index, ctle_model.embed.num_vocab + 1).reshape(batch_len,
+            masked_tokens = src_batch.index_fill(0, mask_index, ctle_model.embed.num_loc + 1).reshape(batch_len,
                                                                                                         -1)  # (batch_size, src_len)
 
             ctle_out = ctle_model(masked_tokens, timestamp=src_t_batch)  # (batch_size, src_len, embed_size)
             masked_out = ctle_out.reshape(-1, ctle_model.embed_size)[mask_index]  # (num_masked, embed_size)
             loss = 0.
             for obj_model in obj_models:
-                loss += obj_model(masked_out, origin_tokens=origin_tokens, origin_hour=origin_hour)
+                loss += obj_model(masked_out, origin_tokens=origin_tokens)
 
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
             running_loss += loss
-        if epoch % 100 == 0:
-            print('Epoch %d loss: %.3f' % (epoch + 1 , running_loss / 100))
-        return ctle_model
+        print('Epoch %d loss: %.3f' % (epoch, running_loss / 100))
+    return ctle_model
