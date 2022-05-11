@@ -79,7 +79,7 @@ class DataSetRaw:
         self.loc_id = raw_df["loc_index"]
         self.num_loc = len(set(self.loc_id))
 
-    def gen_sequence(self, min_len = 5):
+    def gen_sequence(self, min_len=5):
         data = pd.DataFrame(self.df, copy=True)
         data['day'] = pd.to_datetime(data['datetime'], errors='coerce').dt.day
         data['timestamp'] = pd.to_datetime(data['datetime'], errors='coerce').apply(lambda x: x.timestamp())
@@ -87,9 +87,10 @@ class DataSetRaw:
         for (user_index, day), group in data.groupby(["user_index", 'day']):
             if group.shape[0] < min_len:
                 continue
+            group.sort_values(by="timestamp")
             one_seq = [user_index, group['loc_index'].tolist(), group['timestamp'].astype(int).tolist(), group.shape[0]]
             seqs.append(one_seq)
-        print(len(seqs))
+        print("length of trajectories is " + str(len(seqs)))
         return seqs
 
 
@@ -102,32 +103,36 @@ def read_row_data(path):
     records = []
     indexes = ['user_index', 'loc_index', 'datetime', 'lat', 'lng']
     names = []
+    format = '%Y-%m-%d %H:%M:%S'
     for i in range(51):
         name = "0000" + str(i).zfill(2) + "_0"
         names.append(name)
     # for i in range(25):
-    for i in range(len(names)):
+    for i in range(1):
         abs_file = os.path.join(path + names[i])
         data = pd.read_csv(abs_file, header=None)
+        data[2] = data[2].apply(lambda x: time.strftime(format, time.localtime(x + 1633017600)))
         if len(records) == 0:
             records = data
         else:
             records = np.concatenate([records, data], axis=0)
         print(abs_file + "," + str(len(records)))
 
-    records = pd.DataFrame(records, columns=indexes, dtype=str)
-    h5 = pd.HDFStore('data/h5_data/%s.h5' % "complete_row_data", 'w')
+    records = pd.DataFrame(records)
+    records.columns = indexes
+    h5 = pd.HDFStore('data/h5_data/%s.h5' % "test_data", 'w')
     h5['data'] = records
     h5.close()
 
 
-# row_path = "data/row_data/"
-# read_row_data(row_path)
-
 if __name__ == '__main__':
-    df1 = pd.read_hdf(os.path.join('data/h5_data', "complete_row_data_1" + ".h5"), key='data')
-    df2 = pd.read_hdf(os.path.join('data/h5_data', "complete_row_data_2" + ".h5"), key='data')
-    raw_df = pd.concat([df1, df2], axis=0)
-    dataset = DataSetRaw(raw_df)
+    # row_path = "data/row_data/"
+    # read_row_data(row_path)
+    df1 = pd.read_hdf(os.path.join('data/h5_data', "test_data" + ".h5"), key='data')
+    # df2 = pd.read_hdf(os.path.join('data/h5_data', "complete_row_data_2" + ".h5"), key='data')
+
+    # raw_df = pd.concat([df1, df2], axis=0)
+    # raw_df = df1
+    dataset = DataSetRaw(df1)
     seq_set = dataset.gen_sequence()
-    pass
+    # pass
