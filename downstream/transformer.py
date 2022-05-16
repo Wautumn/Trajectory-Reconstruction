@@ -1,10 +1,10 @@
 import os
 from itertools import zip_longest
 import math
-import pandas as pd
 import torch
 import torch.nn as nn
 import numpy as np
+from sklearn.metrics import accuracy_score, recall_score, f1_score
 from torch import optim
 from sklearn.utils import shuffle
 import torch.utils.data as Data
@@ -13,14 +13,16 @@ from dataset import DataSetRaw
 from utils import next_batch
 
 os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
-d_model = 512  # Embedding Size
+# d_model = 512  # Embedding Size
 d_ff = 2048  # FeedForward dimension
 d_k = d_v = 64  # dimension of K(=Q), V
-n_layers = 6  # number of Encoder of Decoder Layer
-n_heads = 8  # number of heads in Multi-Head Attention
-src_vocab_size = 100000
-tgt_vocab_size = 100000
-device = 'cuda:0'
+
+
+# n_layers = 6  # number of Encoder of Decoder Layer
+# n_heads = 8  # number of heads in Multi-Head Attention
+# src_vocab_size = 100000
+# tgt_vocab_size = 100000
+# device = 'cuda:0'
 
 
 class PositionalEncoding(nn.Module):
@@ -89,12 +91,14 @@ class ScaledDotProductAttention(nn.Module):
 
 
 class MultiHeadAttention(nn.Module):
-    def __init__(self):
+    def __init__(self, embed_size, n_heads=8):
         super(MultiHeadAttention, self).__init__()
-        self.W_Q = nn.Linear(d_model, d_k * n_heads, bias=False)
-        self.W_K = nn.Linear(d_model, d_k * n_heads, bias=False)
-        self.W_V = nn.Linear(d_model, d_v * n_heads, bias=False)
-        self.fc = nn.Linear(n_heads * d_v, d_model, bias=False)
+        self.n_heads = n_heads
+        self.d_model = embed_size
+        self.W_Q = nn.Linear(self.d_model, d_k * n_heads, bias=False)
+        self.W_K = nn.Linear(self.d_model, d_k * n_heads, bias=False)
+        self.W_V = nn.Linear(self.d_model, d_v * n_heads, bias=False)
+        self.fc = nn.Linear(n_heads * d_v, self.d_model, bias=False)
 
     def forward(self, input_Q, input_K, input_V, attn_mask):
         '''
@@ -105,29 +109,32 @@ class MultiHeadAttention(nn.Module):
         '''
         residual, batch_size = input_Q, input_Q.size(0)
         # (B, S, D) -proj-> (B, S, D_new) -split-> (B, S, H, W) -trans-> (B, H, S, W)
-        Q = self.W_Q(input_Q).view(batch_size, -1, n_heads, d_k).transpose(1, 2)  # Q: [batch_size, n_heads, len_q, d_k]
-        K = self.W_K(input_K).view(batch_size, -1, n_heads, d_k).transpose(1, 2)  # K: [batch_size, n_heads, len_k, d_k]
-        V = self.W_V(input_V).view(batch_size, -1, n_heads, d_v).transpose(1,
-                                                                           2)  # V: [batch_size, n_heads, len_v(=len_k), d_v]
+        Q = self.W_Q(input_Q).view(batch_size, -1, self.n_heads, d_k).transpose(1,
+                                                                                2)  # Q: [batch_size, n_heads, len_q, d_k]
+        K = self.W_K(input_K).view(batch_size, -1, self.n_heads, d_k).transpose(1,
+                                                                                2)  # K: [batch_size, n_heads, len_k, d_k]
+        V = self.W_V(input_V).view(batch_size, -1, self.n_heads, d_v).transpose(1,
+                                                                                2)  # V: [batch_size, n_heads, len_v(=len_k), d_v]
 
-        attn_mask = attn_mask.unsqueeze(1).repeat(1, n_heads, 1,
+        attn_mask = attn_mask.unsqueeze(1).repeat(1, self.n_heads, 1,
                                                   1)  # attn_mask : [batch_size, n_heads, seq_len, seq_len]
 
         # context: [batch_size, n_heads, len_q, d_v], attn: [batch_size, n_heads, len_q, len_k]
         context, attn = ScaledDotProductAttention()(Q, K, V, attn_mask)
         context = context.transpose(1, 2).reshape(batch_size, -1,
-                                                  n_heads * d_v)  # context: [batch_size, len_q, n_heads * d_v]
+                                                  self.n_heads * d_v)  # context: [batch_size, len_q, n_heads * d_v]
         output = self.fc(context)  # [batch_size, len_q, d_model]
-        return nn.LayerNorm(d_model).cuda()(output + residual), attn
+        return nn.LayerNorm(self.d_model).cuda()(output + residual), attn
 
 
 class PoswiseFeedForwardNet(nn.Module):
-    def __init__(self):
+    def __init__(self, embed_size):
         super(PoswiseFeedForwardNet, self).__init__()
+        self.d_model = embed_size
         self.fc = nn.Sequential(
-            nn.Linear(d_model, d_ff, bias=False),
+            nn.Linear(self.d_model, d_ff, bias=False),
             nn.ReLU(),
-            nn.Linear(d_ff, d_model, bias=False)
+            nn.Linear(d_ff, self.d_model, bias=False)
         )
 
     def forward(self, inputs):
@@ -136,14 +143,15 @@ class PoswiseFeedForwardNet(nn.Module):
         '''
         residual = inputs
         output = self.fc(inputs)
-        return nn.LayerNorm(d_model).cuda()(output + residual)  # [batch_size, seq_len, d_model]
+        return nn.LayerNorm(self.d_model).cuda()(output + residual)  # [batch_size, seq_len, d_model]
 
 
 class EncoderLayer(nn.Module):
-    def __init__(self):
+    def __init__(self, embed_size, n_heads=8):
         super(EncoderLayer, self).__init__()
-        self.enc_self_attn = MultiHeadAttention()
-        self.pos_ffn = PoswiseFeedForwardNet()
+        self.d_model = embed_size
+        self.enc_self_attn = MultiHeadAttention(embed_size)
+        self.pos_ffn = PoswiseFeedForwardNet(embed_size)
 
     def forward(self, enc_inputs, enc_self_attn_mask):
         '''
@@ -158,18 +166,21 @@ class EncoderLayer(nn.Module):
 
 
 class Encoder(nn.Module):
-    def __init__(self):
+    def __init__(self, embedding_layer, embed_size, n_layers=6, n_heads=8):
         super(Encoder, self).__init__()
-        self.src_emb = nn.Embedding(src_vocab_size, d_model)
-        self.pos_emb = PositionalEncoding(d_model)
-        self.layers = nn.ModuleList([EncoderLayer() for _ in range(n_layers)])
+        self.embedding_layer = embedding_layer
+        self.d_model = embed_size
+        # self.src_emb = nn.Embedding(src_vocab_size, d_model)
+        # self.pos_emb = PositionalEncoding(d_model)
+        self.layers = nn.ModuleList([EncoderLayer(embed_size) for _ in range(n_layers)])
 
     def forward(self, enc_inputs):
         '''
         enc_inputs: [batch_size, src_len]
         '''
-        enc_outputs = self.src_emb(enc_inputs)  # [batch_size, src_len, d_model]
-        enc_outputs = self.pos_emb(enc_outputs.transpose(0, 1)).transpose(0, 1)  # [batch_size, src_len, d_model]
+        # enc_outputs = self.src_emb(enc_inputs)  # [batch_size, src_len, d_model]
+        # enc_outputs = self.pos_emb(enc_outputs.transpose(0, 1)).transpose(0, 1)  # [batch_size, src_len, d_model]
+        enc_outputs = self.embedding_layer(enc_inputs)
         enc_self_attn_mask = get_attn_pad_mask(enc_inputs, enc_inputs)  # [batch_size, src_len, src_len]
         enc_self_attns = []
         for layer in self.layers:
@@ -180,11 +191,12 @@ class Encoder(nn.Module):
 
 
 class DecoderLayer(nn.Module):
-    def __init__(self):
+    def __init__(self, embed_size):
         super(DecoderLayer, self).__init__()
-        self.dec_self_attn = MultiHeadAttention()
-        self.dec_enc_attn = MultiHeadAttention()
-        self.pos_ffn = PoswiseFeedForwardNet()
+        self.d_model = embed_size
+        self.dec_self_attn = MultiHeadAttention(embed_size)
+        self.dec_enc_attn = MultiHeadAttention(embed_size)
+        self.pos_ffn = PoswiseFeedForwardNet(embed_size)
 
     def forward(self, dec_inputs, enc_outputs, dec_self_attn_mask, dec_enc_attn_mask):
         '''
@@ -202,11 +214,13 @@ class DecoderLayer(nn.Module):
 
 
 class Decoder(nn.Module):
-    def __init__(self):
+    def __init__(self, embedding_layer, embed_size, n_layers=6):
         super(Decoder, self).__init__()
-        self.tgt_emb = nn.Embedding(tgt_vocab_size, d_model)
-        self.pos_emb = PositionalEncoding(d_model)
-        self.layers = nn.ModuleList([DecoderLayer() for _ in range(n_layers)])
+        self.embedding_layer = embedding_layer
+        self.d_model = embed_size
+        # self.tgt_emb = nn.Embedding(tgt_vocab_size, d_model)
+        # self.pos_emb = PositionalEncoding(d_model)
+        self.layers = nn.ModuleList([DecoderLayer(embed_size) for _ in range(n_layers)])
 
     def forward(self, dec_inputs, enc_inputs, enc_outputs):
         '''
@@ -214,8 +228,9 @@ class Decoder(nn.Module):
         enc_intpus: [batch_size, src_len]
         enc_outputs: [batch_size, src_len, d_model]
         '''
-        dec_outputs = self.tgt_emb(dec_inputs)  # [batch_size, tgt_len, d_model]
-        dec_outputs = self.pos_emb(dec_outputs.transpose(0, 1)).transpose(0, 1).cuda()  # [batch_size, tgt_len, d_model]
+        # dec_outputs = self.tgt_emb(dec_inputs)  # [batch_size, tgt_len, d_model]
+        # dec_outputs = self.pos_emb(dec_outputs.transpose(0, 1)).transpose(0, 1).cuda()  # [batch_size, tgt_len, d_model]
+        dec_outputs = self.embedding_layer(dec_inputs)
         dec_self_attn_pad_mask = get_attn_pad_mask(dec_inputs, dec_inputs).cuda()  # [batch_size, tgt_len, tgt_len]
         dec_self_attn_subsequence_mask = get_attn_subsequence_mask(dec_inputs).cuda()  # [batch_size, tgt_len, tgt_len]
         dec_self_attn_mask = torch.gt((dec_self_attn_pad_mask + dec_self_attn_subsequence_mask),
@@ -234,11 +249,19 @@ class Decoder(nn.Module):
 
 
 class Transformer(nn.Module):
-    def __init__(self):
+    def __init__(self, embedding_layer, embed_size, num_loc, n_layers=6, n_heads=8):
         super(Transformer, self).__init__()
-        self.encoder = Encoder().cuda()
-        self.decoder = Decoder().cuda()
-        self.projection = nn.Linear(d_model, tgt_vocab_size, bias=False).cuda()
+        self.embedding_layer = embedding_layer
+        self.n_layers = n_layers
+        self.n_heads = n_heads
+        self.d_model = embed_size
+        self.num_loc = num_loc
+        self.src_vocab_size = num_loc
+        self.tgt_vocab_size = num_loc
+
+        self.encoder = Encoder(embedding_layer, embed_size=embed_size, n_layers=6)
+        self.decoder = Decoder(embedding_layer, embed_size=embed_size, n_layers=6)
+        self.projection = nn.Linear(self.d_model, self.tgt_vocab_size + 2, bias=False).cuda()
 
     def forward(self, enc_inputs, dec_inputs):
         '''
@@ -247,7 +270,6 @@ class Transformer(nn.Module):
         '''
         # tensor to store decoder outputs
         # outputs = torch.zeros(batch_size, tgt_len, tgt_vocab_size).to(self.device)
-
         # enc_outputs: [batch_size, src_len, d_model], enc_self_attns: [n_layers, batch_size, n_heads, src_len, src_len]
         enc_outputs, enc_self_attns = self.encoder(enc_inputs)
         # dec_outpus: [batch_size, tgt_len, d_model], dec_self_attns: [n_layers, batch_size, n_heads, tgt_len, tgt_len], dec_enc_attn: [n_layers, batch_size, tgt_len, src_len]
@@ -256,14 +278,40 @@ class Transformer(nn.Module):
         return dec_logits.view(-1, dec_logits.size(-1)), enc_self_attns, dec_self_attns, dec_enc_attns
 
 
-def train_transformer(dataset, transformer, num_epoch, batch_size, device):
-    traj_enc_inputs, traj_dec_inputs, traj_dec_outputs = zip(*dataset.gen_enc2dec())
+def greedy_decoder(model, enc_input, start_symbol, end_symbol, max_seq_len):
+    """
+    For simplicity, a Greedy Decoder is Beam search when K=1. This is necessary for inference as we don't know the
+    target sequence input. Therefore we try to generate the target input word by word, then feed it into the transformer.
+    :param model: Transformer Model
+    :param enc_input: The encoder input
+    :param start_symbol: The start symbol. In this example it is 'S' which corresponds to index 4
+    :return: The target input
+    """
+    enc_outputs, enc_self_attns = model.encoder(enc_input)
+    dec_input = torch.zeros(1, 0).type_as(enc_input.data)
+    terminal = False
+    next_symbol = start_symbol
+    while not terminal:
+        dec_input = torch.cat([dec_input.detach(), torch.tensor([[next_symbol]], dtype=enc_input.dtype).cuda()], -1)
+        dec_outputs, _, _ = model.decoder(dec_input, enc_input, enc_outputs)
+        projected = model.projection(dec_outputs)
+        prob = projected.squeeze(0).max(dim=-1, keepdim=False)[1]
+        next_word = prob.data[-1]
+        next_symbol = next_word
+        if next_symbol == end_symbol or dec_input.size(1) >= max_seq_len:
+            terminal = True
+    return dec_input
+
+
+def train_transformer(dataset, max_seq_len, transformer, num_epoch, batch_size, device):
+    traj_enc_inputs, traj_dec_inputs, traj_dec_outputs = zip(*dataset.gen_enc2dec(max_seq_len=max_seq_len))
     criterion = nn.CrossEntropyLoss(ignore_index=0)
     optimizer = optim.SGD(transformer.parameters(), lr=1e-3, momentum=0.99)
+
     for epoch in range(num_epoch):
         all_loss = 0
-        for batch in next_batch(shuffle(list(zip(traj_enc_inputs, traj_dec_inputs, traj_dec_outputs))),
-                                batch_size=batch_size):
+        for i, batch in enumerate(next_batch(shuffle(list(zip(traj_enc_inputs, traj_dec_inputs, traj_dec_outputs))),
+                                             batch_size=batch_size)):
             # Value filled with num_loc stands for masked tokens that shouldn't be considered.
             enc_inputs, dec_inputs, dec_outputs = zip(*batch)
 
@@ -276,19 +324,34 @@ def train_transformer(dataset, transformer, num_epoch, batch_size, device):
             # outputs: [batch_size * tgt_len, tgt_vocab_size]
             outputs, enc_self_attns, dec_self_attns, dec_enc_attns = transformer(enc_inputs, dec_inputs)
             loss = criterion(outputs, dec_outputs.contiguous().view(-1))
-
             all_loss += loss
 
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-            print('Epoch:', '%04d' % (epoch + 1), 'loss =', '{:.6f}'.format(loss))
+            if i % 40 == 0:
+                print('Epoch:', '%04d' % (epoch + 1), 'loss =', '{:.6f}'.format(loss))
         print('-------Epoch:', '%04d' % (epoch + 1), 'loss =', '{:.6f}'.format(all_loss))
+        # test_inputs = []
+        # pre_outpus = []
+        # for j in range(len(traj_enc_inputs)):
+        #     test_enc_input = torch.LongTensor(np.array(traj_enc_inputs[j])).to(device)
+        #     test_output = np.array(traj_dec_outputs[j])
+        #     greedy_dec_input = greedy_decoder(transformer, test_enc_input.view(1, -1),
+        #                                       start_symbol=dataset.start,
+        #                                       end_symbol=dataset.end, max_seq_len=max_seq_len)
+        #     predict, _, _, _ = transformer(test_enc_input.view(1, -1), greedy_dec_input)
+        #     predict = predict.data.max(1, keepdim=True)[1]
+        #     predict = predict.squeeze()
+        #     pre_outpus.append(predict)
+        #     test_inputs.append(test_output)
 
 
 if __name__ == '__main__':
-    file_name = "test_data"
-    raw_df = pd.read_hdf(os.path.join('../data/h5_data', file_name + ".h5"), key='data')
-    dataset = DataSetRaw(raw_df)
-    transformer = Transformer().to(device)
-    train_transformer(dataset, transformer=transformer, num_epoch=100, batch_size=32, device=device)
+    print()
+    # file_name = "test_data"
+    # raw_df = pd.read_hdf(os.path.join('../data/h5_data', file_name + ".h5"), key='data')
+    # dataset = DataSetRaw(raw_df)
+    # embed_layer = ""
+    # transformer = Transformer(embedding_layer=embed_layer, n_layers=6).to(device)
+    # train_transformer(dataset, transformer=transformer, num_epoch=1, batch_size=32, device=device)
