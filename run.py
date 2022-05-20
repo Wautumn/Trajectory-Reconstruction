@@ -39,7 +39,6 @@ ctle_model = CTLE(ctle_embedding, hidden_size, num_layers=ctle_num_layers, num_h
 embed_layer = train_ctle(dataset, ctle_model, obj_models, mask_prop=ctle_mask_prop,
                          num_epoch=embed_epoch, batch_size=64, device=device)
 
-transformer = Transformer(embedding_layer=embed_layer, embed_size=embed_size, n_layers=6, num_loc=dataset.num_loc,
-                          ).to(
-    device)
-train_transformer(dataset, max_seq_len=max_seq_len, transformer=transformer, num_epoch=2, batch_size=64, device=device)
+transformer = Transformer(embedding_layer=embed_layer, embed_size=embed_size, n_layers=6, num_loc=dataset.num_loc
+                          ).to(device)
+train_transformer(dataset, max_seq_len=max_seq_len, transformer=transformer, num_epoch=10, batch_size=16, device=device)

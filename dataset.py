@@ -5,15 +5,6 @@ import os
 import numpy as np
 import time
 
-format = '%Y-%m-%d %H:%M:%S'
-
-
-def getSlot(datetime):
-    format_time = time.strptime(datetime, format)
-    day, hour, minute = format_time.tm_mday, format_time.tm_hour, format_time.tm_min
-    slot = (day - 1) * 48 + hour * 2 + (0 if minute <= 30 else 1)
-    return slot
-
 
 # def slot_time(file_path, file_name, time_slot=30):
 #     indexes = ['user_index', 'loc_index', 'datetime', 'lat', 'lng']
@@ -84,7 +75,7 @@ class DataSetRaw:
         self.end = max(self.loc_id) + 1
         print("Dataset start by %s and end by %s" % (min(self.loc_id), max(self.loc_id)))
 
-    def gen_sequence(self, min_len=5):
+    def gen_sequence(self, min_len=24):
         data = pd.DataFrame(self.df, copy=True)
         data['day'] = pd.to_datetime(data['datetime'], errors='coerce').dt.day
         data['timestamp'] = pd.to_datetime(data['datetime'], errors='coerce').apply(lambda x: x.timestamp())
@@ -98,7 +89,7 @@ class DataSetRaw:
         print("Length of trajectories is " + str(len(seqs)))
         return seqs
 
-    def gen_enc2dec(self, max_seq_len, min_len=5, choice_prop=0.8):
+    def gen_enc2dec(self, max_seq_len, min_len=24, choice_prop=0.8):
         # traj_enc_inputs, traj_dec_inputs, traj_dec_outputs
         data = pd.DataFrame(self.df, copy=True)
         data['day'] = pd.to_datetime(data['datetime'], errors='coerce').dt.day
@@ -108,23 +99,28 @@ class DataSetRaw:
             if group.shape[0] < min_len:
                 continue
             group.sort_values(by="timestamp")
+            ts = group['timestamp'].astype(int).tolist()
             complete_seq = group['loc_index'].tolist()
             choice_count = int(len(complete_seq) * choice_prop)
             choice_index = sorted(
                 np.random.choice(list(range(len(complete_seq))), size=choice_count, replace=False, p=None))
+
             enc_inputs = np.array(complete_seq)[choice_index]
             enc_inputs = list(enc_inputs)
-            dec_inputs = [self.start]
-            dec_inputs.extend(list(complete_seq))
+            # dec_inputs = [self.start]
+            dec_inputs = list(complete_seq)
             dec_outputs = list(complete_seq)
-            dec_outputs.append(self.end)
+
+            ts_input = np.array(ts)[choice_index]
+            ts_output = np.array(ts)
+
             # while len(enc_inputs) < max_seq_len:
             #     enc_inputs.append(0)
             # while len(dec_inputs) < max_seq_len:
             #     dec_inputs.append(0)
             # while len(dec_outputs) < max_seq_len:
             #     dec_outputs.append(0)
-            one_seq = [enc_inputs, dec_inputs, dec_outputs]
+            one_seq = [enc_inputs, dec_inputs, dec_outputs, ts_input, ts_output]
             seqs.append(one_seq)
         print("Length of encoder and decoder dataset is " + str(len(seqs)))
         return seqs
