@@ -11,7 +11,9 @@ import os
 import torch.utils.data as Data
 from random import *
 
-max_len = 200  # 轨迹的最大长度
+from utils import traj_to_slot
+
+max_len = 50  # 轨迹的最大长度
 batch_size = 6
 max_pred = 5  # max tokens of prediction
 n_layers = 6
@@ -26,33 +28,83 @@ train_prop = 0.8
 raw_df = pd.read_hdf(os.path.join('../data/h5_data', "test_data" + ".h5"), key='data')
 dataset = DataSetRaw(raw_df)
 text = dataset.gen_bert()
-
 word_list = list(
-    set(text[i][j] for i in range(len(text)) for j in range(len(text[i]))))
+    set(text[i][0][j] for i in range(len(text)) for j in range(len(text[i][0]))))
 word2idx = {'[PAD]': 0, '[CLS]': 1, '[SEP]': 2, '[MASK]': 3}
 for i, w in enumerate(word_list):
     word2idx[w] = i + 4
 idx2word = {i: w for i, w in enumerate(word2idx)}
 vocab_size = len(word2idx)
+
+text_slot = []
+for i in range(len(text)):
+    loc = text[i][0]
+    ts = text[i][1]
+    loc_slot = traj_to_slot(trajectory=loc, ts=ts, pad="[PAD]")
+    text_slot.append(loc_slot)
+
 token_list = list()
-for sentence in text:
+for sentence in text_slot:
     arr = [word2idx[s] for s in sentence]
     token_list.append(arr)
-print()
 
 train_token_list = token_list[:int(len(token_list) * train_prop)]
 test_token_list = token_list[int(len(token_list) * train_prop):]
 
 
-def make_data(token_list):
+# def make_data(token_list):
+#     batch = []
+#     positive = negative = 0
+#     while positive != batch_size / 2 or negative != batch_size / 2:
+#         tokens_a_index, tokens_b_index = randrange(len(token_list)), randrange(
+#             len(token_list))  # sample random index in sentences
+#         tokens_a, tokens_b = token_list[tokens_a_index], token_list[tokens_b_index]
+#         input_ids = [word2idx['[CLS]']] + tokens_a + [word2idx['[SEP]']] + tokens_b + [word2idx['[SEP]']]
+#         segment_ids = [0] * (1 + len(tokens_a) + 1) + [1] * (len(tokens_b) + 1)
+#
+#         # MASK LM
+#         n_pred = min(max_pred, max(1, int(len(input_ids) * 0.15)))  # 15 % of tokens in one sentence
+#         cand_maked_pos = [i for i, token in enumerate(input_ids)
+#                           if token != word2idx['[CLS]'] and token != word2idx['[SEP]']]  # candidate masked position
+#         shuffle(cand_maked_pos)
+#         masked_tokens, masked_pos = [], []
+#         for pos in cand_maked_pos[:n_pred]:
+#             masked_pos.append(pos)
+#             masked_tokens.append(input_ids[pos])
+#             if random() < 0.8:  # 80%
+#                 input_ids[pos] = word2idx['[MASK]']  # make mask
+#             elif random() > 0.9:  # 10%
+#                 index = randint(0, vocab_size - 1)  # random index in vocabulary
+#                 while index < 4:  # can't involve 'CLS', 'SEP', 'PAD'
+#                     index = randint(0, vocab_size - 1)
+#                 input_ids[pos] = index  # replace
+#
+#         # Zero Paddings
+#         n_pad = max_len - len(input_ids)
+#         input_ids.extend([0] * n_pad)
+#         segment_ids.extend([0] * n_pad)
+#
+#         # Zero Padding (100% - 15%) tokens
+#         if max_pred > n_pred:
+#             n_pad = max_pred - n_pred
+#             masked_tokens.extend([0] * n_pad)
+#             masked_pos.extend([0] * n_pad)
+#
+#         if tokens_a_index + 1 == tokens_b_index and positive < batch_size / 2:
+#             batch.append([input_ids, segment_ids, masked_tokens, masked_pos, True])  # IsNext
+#             positive += 1
+#         elif tokens_a_index + 1 != tokens_b_index and negative < batch_size / 2:
+#             batch.append([input_ids, segment_ids, masked_tokens, masked_pos, False])  # NotNext
+#             negative += 1
+#     return batch
+
+
+def make_train_data(token_list):
     batch = []
-    positive = negative = 0
-    while positive != batch_size / 2 or negative != batch_size / 2:
-        tokens_a_index, tokens_b_index = randrange(len(token_list)), randrange(
-            len(token_list))  # sample random index in sentences
-        tokens_a, tokens_b = token_list[tokens_a_index], token_list[tokens_b_index]
-        input_ids = [word2idx['[CLS]']] + tokens_a + [word2idx['[SEP]']] + tokens_b + [word2idx['[SEP]']]
-        segment_ids = [0] * (1 + len(tokens_a) + 1) + [1] * (len(tokens_b) + 1)
+    while len(batch) < batch_size:
+        tokens_a_index = randrange(len(token_list))  # sample random index in sentences
+        tokens_a = token_list[tokens_a_index]
+        input_ids = [word2idx['[CLS]']] + tokens_a + [word2idx['[SEP]']]
 
         # MASK LM
         n_pred = min(max_pred, max(1, int(len(input_ids) * 0.15)))  # 15 % of tokens in one sentence
@@ -74,46 +126,72 @@ def make_data(token_list):
         # Zero Paddings
         n_pad = max_len - len(input_ids)
         input_ids.extend([0] * n_pad)
-        segment_ids.extend([0] * n_pad)
 
         # Zero Padding (100% - 15%) tokens
         if max_pred > n_pred:
             n_pad = max_pred - n_pred
             masked_tokens.extend([0] * n_pad)
             masked_pos.extend([0] * n_pad)
-
-        if tokens_a_index + 1 == tokens_b_index and positive < batch_size / 2:
-            batch.append([input_ids, segment_ids, masked_tokens, masked_pos, True])  # IsNext
-            positive += 1
-        elif tokens_a_index + 1 != tokens_b_index and negative < batch_size / 2:
-            batch.append([input_ids, segment_ids, masked_tokens, masked_pos, False])  # NotNext
-            negative += 1
+        batch.append([input_ids, masked_tokens, masked_pos])
     return batch
 
 
-batch = make_data(train_token_list)
-input_ids, segment_ids, masked_tokens, masked_pos, isNext = zip(*batch)
-input_ids, segment_ids, masked_tokens, masked_pos, isNext = torch.LongTensor(input_ids), torch.LongTensor(
-    segment_ids), torch.LongTensor(masked_tokens), torch.LongTensor(masked_pos), torch.LongTensor(isNext)
+def make_test_data(token_list):
+    test = []
+    for i in range(len(token_list)):
+        tokens_a = token_list[i]
+        input_ids = [word2idx['[CLS]']] + tokens_a + [word2idx['[SEP]']]
+
+        # MASK LM
+        n_pred = min(max_pred, max(1, int(len(input_ids) * 0.15)))  # 15 % of tokens in one sentence
+        cand_maked_pos = [i for i, token in enumerate(input_ids)
+                          if token != word2idx['[CLS]'] and token != word2idx['[SEP]']]  # candidate masked position
+        shuffle(cand_maked_pos)
+        masked_tokens, masked_pos = [], []
+        for pos in cand_maked_pos[:n_pred]:
+            masked_pos.append(pos)
+            masked_tokens.append(input_ids[pos])
+            if random() < 0.8:  # 80%
+                input_ids[pos] = word2idx['[MASK]']  # make mask
+            elif random() > 0.9:  # 10%
+                index = randint(0, vocab_size - 1)  # random index in vocabulary
+                while index < 4:  # can't involve 'CLS', 'SEP', 'PAD'
+                    index = randint(0, vocab_size - 1)
+                input_ids[pos] = index  # replace
+
+        # Zero Paddings
+        n_pad = max_len - len(input_ids)
+        input_ids.extend([0] * n_pad)
+
+        # Zero Padding (100% - 15%) tokens
+        if max_pred > n_pred:
+            n_pad = max_pred - n_pred
+            masked_tokens.extend([0] * n_pad)
+            masked_pos.extend([0] * n_pad)
+        test.append([input_ids, masked_tokens, masked_pos])
+    return test
+
+
+batch = make_train_data(train_token_list)
+input_ids, masked_tokens, masked_pos = zip(*batch)
+input_ids, masked_tokens, masked_pos = torch.LongTensor(input_ids), torch.LongTensor(masked_tokens), torch.LongTensor(
+    masked_pos)
 
 
 class MyDataSet(Data.Dataset):
-    def __init__(self, input_ids, segment_ids, masked_tokens, masked_pos, isNext):
+    def __init__(self, input_ids, masked_tokens, masked_pos):
         self.input_ids = input_ids
-        self.segment_ids = segment_ids
         self.masked_tokens = masked_tokens
         self.masked_pos = masked_pos
-        self.isNext = isNext
 
     def __len__(self):
         return len(self.input_ids)
 
     def __getitem__(self, idx):
-        return self.input_ids[idx], self.segment_ids[idx], self.masked_tokens[idx], self.masked_pos[idx], self.isNext[
-            idx]
+        return self.input_ids[idx], self.masked_tokens[idx], self.masked_pos[idx]
 
 
-loader = Data.DataLoader(MyDataSet(input_ids, segment_ids, masked_tokens, masked_pos, isNext), batch_size, True)
+loader = Data.DataLoader(MyDataSet(input_ids, masked_tokens, masked_pos), batch_size, True)
 
 
 def get_attn_pad_mask(seq_q, seq_k):
@@ -138,14 +216,14 @@ class Embedding(nn.Module):
         super(Embedding, self).__init__()
         self.tok_embed = nn.Embedding(vocab_size, d_model)  # token embedding
         self.pos_embed = nn.Embedding(max_len, d_model)  # position embedding
-        self.seg_embed = nn.Embedding(n_segments, d_model)  # segment(token type) embedding
+        # self.seg_embed = nn.Embedding(n_segments, d_model)  # segment(token type) embedding
         self.norm = nn.LayerNorm(d_model)
 
-    def forward(self, x, seg):
+    def forward(self, x):
         seq_len = x.size(1)
         pos = torch.arange(seq_len, dtype=torch.long)
         pos = pos.unsqueeze(0).expand_as(x)  # [seq_len] -> [batch_size, seq_len]
-        embedding = self.tok_embed(x) + self.pos_embed(pos) + self.seg_embed(seg)
+        embedding = self.tok_embed(x) + self.pos_embed(pos)
         return self.norm(embedding)
 
 
@@ -229,87 +307,81 @@ class BERT(nn.Module):
         self.fc2 = nn.Linear(d_model, vocab_size, bias=False)
         self.fc2.weight = embed_weight
 
-    def forward(self, input_ids, segment_ids, masked_pos):
-        output = self.embedding(input_ids, segment_ids)  # [bach_size, seq_len, d_model]
+    def forward(self, input_ids, masked_pos):
+        output = self.embedding(input_ids)  # [bach_size, seq_len, d_model]
         enc_self_attn_mask = get_attn_pad_mask(input_ids, input_ids)  # [batch_size, maxlen, maxlen]
         for layer in self.layers:
             # output: [batch_size, max_len, d_model]
             output = layer(output, enc_self_attn_mask)
         # it will be decided by first token(CLS)
-        h_pooled = self.fc(output[:, 0])  # [batch_size, d_model]
-        logits_clsf = self.classifier(h_pooled)  # [batch_size, 2] predict isNext
+        # h_pooled = self.fc(output[:, 0])  # [batch_size, d_model]
+        # logits_clsf = self.classifier(h_pooled)  # [batch_size, 2] predict isNext
 
         masked_pos = masked_pos[:, :, None].expand(-1, -1, d_model)  # [batch_size, max_pred, d_model]
         h_masked = torch.gather(output, 1, masked_pos)  # masking position [batch_size, max_pred, d_model]
         h_masked = self.activ2(self.linear(h_masked))  # [batch_size, max_pred, d_model]
         logits_lm = self.fc2(h_masked)  # [batch_size, max_pred, vocab_size]
-        return logits_lm, logits_clsf
+        return logits_lm
 
 
 model = BERT()
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adadelta(model.parameters(), lr=0.001)
 
-for epoch in range(200):
-    for input_ids, segment_ids, masked_tokens, masked_pos, isNext in loader:
-        logits_lm, logits_clsf = model(input_ids, segment_ids, masked_pos)
+train_predict = []
+train_truth = []
+for epoch in range(500):
+    train_predict, train_truth = [], []
+    for input_ids, masked_tokens, masked_pos in loader:
+        logits_lm = model(input_ids, masked_pos)
+        train_truth.extend(masked_tokens.flatten().data.numpy())
+        train_predict.extend(logits_lm.data.max(2)[1].flatten().data.numpy())
         loss_lm = criterion(logits_lm.view(-1, vocab_size), masked_tokens.view(-1))  # for masked LM
         loss_lm = (loss_lm.float()).mean()
-        loss_clsf = criterion(logits_clsf, isNext)  # for sentence classification
-        loss = loss_lm + loss_clsf
+        loss = loss_lm
         if (epoch + 1) % 10 == 0:
-            print('Epoch:', '%04d' % (epoch + 1), 'loss =', '{:.6f}'.format(loss))
+            accuracy = accuracy_score(train_truth, train_predict)
+            print('Epoch:', '%04d' % (epoch + 1), 'loss =', '{:.6f}'.format(loss), 'train accracy =',
+                  '{:.6f}'.format(accuracy))
+
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
 
 # Predict mask tokens ans isNext
-predict = []
-truth = []
-for i in range(5):
-    input_ids, segment_ids, masked_tokens, masked_pos, isNext = batch[i]
-    print(text)
-    print([idx2word[w] for w in input_ids if idx2word[w] != '[PAD]'])
+# predict = []
+# truth = []
+# for i in range(5):
+#     input_ids, masked_tokens, masked_pos = batch[i]
+#     print(text)
+#     print([idx2word[w] for w in input_ids if idx2word[w] != '[PAD]'])
+#
+#     logits_lm = model(torch.LongTensor([input_ids]), torch.LongTensor([masked_pos]))
+#     logits_lm = logits_lm.data.max(2)[1][0].data.numpy()
+#     print('masked tokens list : ', [pos for pos in masked_tokens if pos != 0])
+#     truth.extend(masked_tokens)
+#     print('predict masked tokens list : ', [pos for pos in logits_lm if pos != 0])
+#     predict.extend(logits_lm)
+# accuracy = accuracy_score(truth, predict)
+# print(accuracy)
 
-    logits_lm, logits_clsf = model(torch.LongTensor([input_ids]), \
-                                   torch.LongTensor([segment_ids]), torch.LongTensor([masked_pos]))
-    logits_lm = logits_lm.data.max(2)[1][0].data.numpy()
-    print('masked tokens list : ', [pos for pos in masked_tokens if pos != 0])
-    truth.extend(masked_tokens)
-    print('predict masked tokens list : ', [pos for pos in logits_lm if pos != 0])
-    predict.extend(logits_lm)
-
-    logits_clsf = logits_clsf.data.max(1)[1].data.numpy()[0]
-    print('isNext : ', True if isNext else False)
-    print('predict isNext : ', True if logits_clsf else False)
-accuracy = accuracy_score(truth, predict)
-print(accuracy)
 
 def test():
-    test_batch = make_data(test_token_list)
-    input_ids, segment_ids, masked_tokens, masked_pos, isNext = zip(*test_batch)
-    input_ids, segment_ids, masked_tokens, masked_pos, isNext = torch.LongTensor(input_ids), torch.LongTensor(
-        segment_ids), torch.LongTensor(masked_tokens), torch.LongTensor(masked_pos), torch.LongTensor(isNext)
+    test_batch = make_test_data(test_token_list)
     predict = []
     truth = []
-    for i in range(5):
-        input_ids, segment_ids, masked_tokens, masked_pos, isNext = test_batch[i]
+    for i in range(len(test_batch)):
+        input_ids, masked_tokens, masked_pos = test_batch[i]
         # print(text)
         # print([idx2word[w] for w in input_ids if idx2word[w] != '[PAD]'])
-        logits_lm, logits_clsf = model(torch.LongTensor([input_ids]), torch.LongTensor([segment_ids]),
-                                       torch.LongTensor([masked_pos]))
+        logits_lm = model(torch.LongTensor([input_ids]), torch.LongTensor([masked_pos]))
         logits_lm = logits_lm.data.max(2)[1][0].data.numpy()
-        print('masked tokens list : ', [pos for pos in masked_tokens if pos != 0])
+        # print('masked tokens list : ', [pos for pos in masked_tokens if pos != 0])
         truth.extend(masked_tokens)
-        print('predict masked tokens list : ', [pos for pos in logits_lm if pos != 0])
+        # print('predict masked tokens list : ', [pos for pos in logits_lm if pos != 0])
         predict.extend(logits_lm)
-
-        logits_clsf = logits_clsf.data.max(1)[1].data.numpy()[0]
-        print('isNext : ', True if isNext else False)
-        print('predict isNext : ', True if logits_clsf else False)
     accuracy = accuracy_score(truth, predict)
-    print(accuracy)
-
+    print('test accracy =', '{:.6f}'.format(accuracy))
 
 test()
