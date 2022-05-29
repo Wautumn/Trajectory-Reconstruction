@@ -67,6 +67,8 @@ def gen_train_data(path):
         data['user_index'] = data[0]
         data['loc_index'] = data[1]
         for (user_index, day), group in data.groupby(["user_index", 'day']):
+            if group.shape[0] < 12:
+                continue
             group.sort_values(by="timestamp")
             ts = group['timestamp'].astype(int).tolist()
             seq = group['loc_index'].tolist()
@@ -103,6 +105,8 @@ def gen_test_data(path, n_pred):
         data['user_index'] = data[0]
         data['loc_index'] = data[1]
         for (user_index, day), group in data.groupby(["user_index", 'day']):
+            if group.shape[0] < 12:
+                continue
             group.sort_values(by="timestamp")
             ts = group['timestamp'].astype(int).tolist()
             seq = group['loc_index'].tolist()
@@ -160,7 +164,7 @@ class DataSet:
 
 
 if __name__ == '__main__':
-    # gen_train_data("data/row_data")
+    gen_train_data("data/row_data")
     # gen_test_data("data/row_data", n_pred=5)
     # train_df = pd.read_hdf(os.path.join('data/h5_data', "train_trajectory" + ".h5"), key='data')
     # test_df = pd.read_hdf(os.path.join('data/h5_data', "test_trajectory" + ".h5"), key='data')

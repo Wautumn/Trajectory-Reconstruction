@@ -41,11 +41,9 @@ def ts_to_slot(ts):
     return ans
 
 
-def traj_to_slot(trajectory, ts):
-    ans = [0] * 48
+def traj_to_slot(trajectory, ts, pad=0):
+    ans = [pad] * 48
     for i in range(len(ts)):
         slot_id = get_slot_by_unix(ts[i])
         ans[slot_id] = trajectory[i]
     return ans
-
-

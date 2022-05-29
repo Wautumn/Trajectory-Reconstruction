@@ -5,98 +5,69 @@ import math
 
 from sklearn.metrics import accuracy_score
 from torch import optim
-from dataset import DataSetRaw
 import pandas as pd
 import os
 import torch.utils.data as Data
 from random import *
 
-from utils import traj_to_slot
+from preprocess import DataSet
+from utils import traj_to_slot, next_batch
+
+# device = 'cuda:0'
 
 max_len = 50  # 轨迹的最大长度
-batch_size = 6
+batch_size = 128
 max_pred = 5  # max tokens of prediction
 n_layers = 6
 n_heads = 12
 d_model = 768
 d_ff = 768 * 4  # 4*d_model, FeedForward dimension
 d_k = d_v = 64  # dimension of K(=Q), V
-n_segments = 2
-vocab_size = 8000
+# n_segments = 2
 
-train_prop = 0.8
-raw_df = pd.read_hdf(os.path.join('../data/h5_data', "test_data" + ".h5"), key='data')
-dataset = DataSetRaw(raw_df)
-text = dataset.gen_bert()
-word_list = list(
-    set(text[i][0][j] for i in range(len(text)) for j in range(len(text[i][0]))))
+train_df = pd.read_hdf(os.path.join('../data/h5_data', "train_trajectory" + ".h5"), key='data')
+test_df = pd.read_hdf(os.path.join('../data/h5_data', "test_trajectory" + ".h5"), key='data')
+dataset = DataSet(train_df=train_df, test_df=test_df)
+train_data = dataset.gen_train_data()
+test_data = dataset.gen_test_data()
+
+train_word_list = list(
+    set(str(train_data[i][j]) for i in range(len(train_data)) for j in range(len(train_data[i]))))
+test_word_list = list(
+    set(str(test_data[i][0][j]) for i in range(len(test_data)) for j in range(len(test_data[i][0]))))
+test_masked_list = list(
+    set(str(test_data[i][2][j]) for i in range(len(test_data)) for j in range(len(test_data[i][2]))))
+word_list = []
+word_list.extend(train_word_list)
+word_list.extend(test_word_list)
+word_list.extend(test_masked_list)
+word_list = list(set(word_list))
+
 word2idx = {'[PAD]': 0, '[CLS]': 1, '[SEP]': 2, '[MASK]': 3}
 for i, w in enumerate(word_list):
-    word2idx[w] = i + 4
+    if w != '[PAD]' and w != '[MASK]':
+        word2idx[w] = i + 4
+    elif w == '0':
+        print("error")
+    else:
+        print()
+
 idx2word = {i: w for i, w in enumerate(word2idx)}
-vocab_size = len(word2idx)
+vocab_size = len(word2idx) + 2
 
-text_slot = []
-for i in range(len(text)):
-    loc = text[i][0]
-    ts = text[i][1]
-    loc_slot = traj_to_slot(trajectory=loc, ts=ts, pad="[PAD]")
-    text_slot.append(loc_slot)
-
-token_list = list()
-for sentence in text_slot:
+train_token_list = list()
+for sentence in train_data:
     arr = [word2idx[s] for s in sentence]
-    token_list.append(arr)
+    train_token_list.append(arr)
 
-train_token_list = token_list[:int(len(token_list) * train_prop)]
-test_token_list = token_list[int(len(token_list) * train_prop):]
-
-
-# def make_data(token_list):
-#     batch = []
-#     positive = negative = 0
-#     while positive != batch_size / 2 or negative != batch_size / 2:
-#         tokens_a_index, tokens_b_index = randrange(len(token_list)), randrange(
-#             len(token_list))  # sample random index in sentences
-#         tokens_a, tokens_b = token_list[tokens_a_index], token_list[tokens_b_index]
-#         input_ids = [word2idx['[CLS]']] + tokens_a + [word2idx['[SEP]']] + tokens_b + [word2idx['[SEP]']]
-#         segment_ids = [0] * (1 + len(tokens_a) + 1) + [1] * (len(tokens_b) + 1)
-#
-#         # MASK LM
-#         n_pred = min(max_pred, max(1, int(len(input_ids) * 0.15)))  # 15 % of tokens in one sentence
-#         cand_maked_pos = [i for i, token in enumerate(input_ids)
-#                           if token != word2idx['[CLS]'] and token != word2idx['[SEP]']]  # candidate masked position
-#         shuffle(cand_maked_pos)
-#         masked_tokens, masked_pos = [], []
-#         for pos in cand_maked_pos[:n_pred]:
-#             masked_pos.append(pos)
-#             masked_tokens.append(input_ids[pos])
-#             if random() < 0.8:  # 80%
-#                 input_ids[pos] = word2idx['[MASK]']  # make mask
-#             elif random() > 0.9:  # 10%
-#                 index = randint(0, vocab_size - 1)  # random index in vocabulary
-#                 while index < 4:  # can't involve 'CLS', 'SEP', 'PAD'
-#                     index = randint(0, vocab_size - 1)
-#                 input_ids[pos] = index  # replace
-#
-#         # Zero Paddings
-#         n_pad = max_len - len(input_ids)
-#         input_ids.extend([0] * n_pad)
-#         segment_ids.extend([0] * n_pad)
-#
-#         # Zero Padding (100% - 15%) tokens
-#         if max_pred > n_pred:
-#             n_pad = max_pred - n_pred
-#             masked_tokens.extend([0] * n_pad)
-#             masked_pos.extend([0] * n_pad)
-#
-#         if tokens_a_index + 1 == tokens_b_index and positive < batch_size / 2:
-#             batch.append([input_ids, segment_ids, masked_tokens, masked_pos, True])  # IsNext
-#             positive += 1
-#         elif tokens_a_index + 1 != tokens_b_index and negative < batch_size / 2:
-#             batch.append([input_ids, segment_ids, masked_tokens, masked_pos, False])  # NotNext
-#             negative += 1
-#     return batch
+test_token_list, test_masked_tokens, test_masked_pos = list(), list(), list()
+for sentence in test_data:
+    arr = [word2idx[s] for s in sentence[0]]
+    arr = [word2idx['[CLS]']] + arr + [word2idx['[SEP]']]
+    test_token_list.append(arr)
+    masked = [word2idx[str(s)] for s in sentence[2]]
+    test_masked_tokens.append(masked)
+    test_masked_pos.append(sentence[1])
 
 
 def make_train_data(token_list):
@@ -109,7 +80,8 @@ def make_train_data(token_list):
         # MASK LM
         n_pred = min(max_pred, max(1, int(len(input_ids) * 0.15)))  # 15 % of tokens in one sentence
         cand_maked_pos = [i for i, token in enumerate(input_ids)
-                          if token != word2idx['[CLS]'] and token != word2idx['[SEP]']]  # candidate masked position
+                          if token != word2idx['[CLS]'] and token != word2idx['[SEP]'] and token != word2idx[
+                              '[PAD]']]  # candidate masked position
         shuffle(cand_maked_pos)
         masked_tokens, masked_pos = [], []
         for pos in cand_maked_pos[:n_pred]:
@@ -123,9 +95,10 @@ def make_train_data(token_list):
                     index = randint(0, vocab_size - 1)
                 input_ids[pos] = index  # replace
 
-        # Zero Paddings
-        n_pad = max_len - len(input_ids)
-        input_ids.extend([0] * n_pad)
+        # # Zero Paddings
+        # n_pad = max_len - len(input_ids)
+        # print(n_pad)
+        # input_ids.extend([0] * n_pad)
 
         # Zero Padding (100% - 15%) tokens
         if max_pred > n_pred:
@@ -136,46 +109,11 @@ def make_train_data(token_list):
     return batch
 
 
-def make_test_data(token_list):
-    test = []
-    for i in range(len(token_list)):
-        tokens_a = token_list[i]
-        input_ids = [word2idx['[CLS]']] + tokens_a + [word2idx['[SEP]']]
-
-        # MASK LM
-        n_pred = min(max_pred, max(1, int(len(input_ids) * 0.15)))  # 15 % of tokens in one sentence
-        cand_maked_pos = [i for i, token in enumerate(input_ids)
-                          if token != word2idx['[CLS]'] and token != word2idx['[SEP]']]  # candidate masked position
-        shuffle(cand_maked_pos)
-        masked_tokens, masked_pos = [], []
-        for pos in cand_maked_pos[:n_pred]:
-            masked_pos.append(pos)
-            masked_tokens.append(input_ids[pos])
-            if random() < 0.8:  # 80%
-                input_ids[pos] = word2idx['[MASK]']  # make mask
-            elif random() > 0.9:  # 10%
-                index = randint(0, vocab_size - 1)  # random index in vocabulary
-                while index < 4:  # can't involve 'CLS', 'SEP', 'PAD'
-                    index = randint(0, vocab_size - 1)
-                input_ids[pos] = index  # replace
-
-        # Zero Paddings
-        n_pad = max_len - len(input_ids)
-        input_ids.extend([0] * n_pad)
-
-        # Zero Padding (100% - 15%) tokens
-        if max_pred > n_pred:
-            n_pad = max_pred - n_pred
-            masked_tokens.extend([0] * n_pad)
-            masked_pos.extend([0] * n_pad)
-        test.append([input_ids, masked_tokens, masked_pos])
-    return test
-
-
 batch = make_train_data(train_token_list)
 input_ids, masked_tokens, masked_pos = zip(*batch)
-input_ids, masked_tokens, masked_pos = torch.LongTensor(input_ids), torch.LongTensor(masked_tokens), torch.LongTensor(
-    masked_pos)
+input_ids, masked_tokens, masked_pos = torch.LongTensor(input_ids).cuda(), torch.LongTensor(
+    masked_tokens).cuda(), torch.LongTensor(
+    masked_pos).cuda()
 
 
 class MyDataSet(Data.Dataset):
@@ -222,7 +160,9 @@ class Embedding(nn.Module):
     def forward(self, x):
         seq_len = x.size(1)
         pos = torch.arange(seq_len, dtype=torch.long)
-        pos = pos.unsqueeze(0).expand_as(x)  # [seq_len] -> [batch_size, seq_len]
+        pos = pos.unsqueeze(0).expand_as(x).cuda()  # [seq_len] -> [batch_size, seq_len]
+        self.tok_embed(x)
+        self.pos_embed(pos)
         embedding = self.tok_embed(x) + self.pos_embed(pos)
         return self.norm(embedding)
 
@@ -242,9 +182,10 @@ class ScaledDotProductAttention(nn.Module):
 class MultiHeadAttention(nn.Module):
     def __init__(self):
         super(MultiHeadAttention, self).__init__()
-        self.W_Q = nn.Linear(d_model, d_k * n_heads)
-        self.W_K = nn.Linear(d_model, d_k * n_heads)
-        self.W_V = nn.Linear(d_model, d_v * n_heads)
+        self.W_Q = nn.Linear(d_model, d_k * n_heads, bias=False)
+        self.W_K = nn.Linear(d_model, d_k * n_heads, bias=False)
+        self.W_V = nn.Linear(d_model, d_v * n_heads, bias=False)
+        self.fc = nn.Linear(n_heads * d_v, d_model, bias=False)
 
     def forward(self, Q, K, V, attn_mask):
         # q: [batch_size, seq_len, d_model], k: [batch_size, seq_len, d_model], v: [batch_size, seq_len, d_model]
@@ -261,8 +202,8 @@ class MultiHeadAttention(nn.Module):
         context = ScaledDotProductAttention()(q_s, k_s, v_s, attn_mask)
         context = context.transpose(1, 2).contiguous().view(batch_size, -1,
                                                             n_heads * d_v)  # context: [batch_size, seq_len, n_heads * d_v]
-        output = nn.Linear(n_heads * d_v, d_model)(context)
-        return nn.LayerNorm(d_model)(output + residual)  # output: [batch_size, seq_len, d_model]
+        output = self.fc(context)
+        return nn.LayerNorm(d_model).cuda()(output + residual)  # output: [batch_size, seq_len, d_model]
 
 
 class PoswiseFeedForwardNet(nn.Module):
@@ -324,64 +265,54 @@ class BERT(nn.Module):
         return logits_lm
 
 
-model = BERT()
+model = BERT().cuda()
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adadelta(model.parameters(), lr=0.001)
 
 train_predict = []
 train_truth = []
-for epoch in range(500):
+for epoch in range(5000):
     train_predict, train_truth = [], []
     for input_ids, masked_tokens, masked_pos in loader:
         logits_lm = model(input_ids, masked_pos)
-        train_truth.extend(masked_tokens.flatten().data.numpy())
-        train_predict.extend(logits_lm.data.max(2)[1].flatten().data.numpy())
+        train_truth.extend(masked_tokens.flatten().cpu().data.numpy())
+        train_predict.extend(logits_lm.data.max(2)[1].flatten().cpu().data.numpy())
         loss_lm = criterion(logits_lm.view(-1, vocab_size), masked_tokens.view(-1))  # for masked LM
         loss_lm = (loss_lm.float()).mean()
         loss = loss_lm
         if (epoch + 1) % 10 == 0:
             accuracy = accuracy_score(train_truth, train_predict)
-            print('Epoch:', '%04d' % (epoch + 1), 'loss =', '{:.6f}'.format(loss), 'train accracy =',
+            print('Epoch:', '%06d' % (epoch + 1), 'loss =', '{:.6f}'.format(loss), 'train accracy =',
                   '{:.6f}'.format(accuracy))
 
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
-
-# Predict mask tokens ans isNext
-# predict = []
-# truth = []
-# for i in range(5):
-#     input_ids, masked_tokens, masked_pos = batch[i]
-#     print(text)
-#     print([idx2word[w] for w in input_ids if idx2word[w] != '[PAD]'])
-#
-#     logits_lm = model(torch.LongTensor([input_ids]), torch.LongTensor([masked_pos]))
-#     logits_lm = logits_lm.data.max(2)[1][0].data.numpy()
-#     print('masked tokens list : ', [pos for pos in masked_tokens if pos != 0])
-#     truth.extend(masked_tokens)
-#     print('predict masked tokens list : ', [pos for pos in logits_lm if pos != 0])
-#     predict.extend(logits_lm)
-# accuracy = accuracy_score(truth, predict)
-# print(accuracy)
+# test_token_list, test_masked_tokens, test_masked_pos
+for i in range(len(test_masked_pos)):
+    for j in range(len(test_masked_pos[i])):
+        test_masked_pos[i][j] += 1
 
 
-def test():
-    test_batch = make_test_data(test_token_list)
-    predict = []
+def test(test_token_list, test_masked_tokens, test_masked_pos):
+    # token_list = np.array(test_token_list)
+    masked_tokens = np.array(test_masked_tokens).reshape(-1)
+    # masked_pos = np.array(test_masked_pos)
+    a = list(zip(test_token_list, test_masked_pos))
     truth = []
-    for i in range(len(test_batch)):
-        input_ids, masked_tokens, masked_pos = test_batch[i]
-        # print(text)
-        # print([idx2word[w] for w in input_ids if idx2word[w] != '[PAD]'])
-        logits_lm = model(torch.LongTensor([input_ids]), torch.LongTensor([masked_pos]))
-        logits_lm = logits_lm.data.max(2)[1][0].data.numpy()
-        # print('masked tokens list : ', [pos for pos in masked_tokens if pos != 0])
-        truth.extend(masked_tokens)
-        # print('predict masked tokens list : ', [pos for pos in logits_lm if pos != 0])
-        predict.extend(logits_lm)
-    accuracy = accuracy_score(truth, predict)
-    print('test accracy =', '{:.6f}'.format(accuracy))
+    predict = []
 
-test()
+    for batch in next_batch(a, batch_size=32):
+        # Value filled with num_loc stands for masked tokens that shouldn't be considered.
+        batch_token_list, batch_masked_pos = zip(*batch)
+        logits_lm = model(torch.LongTensor(batch_token_list).cuda(), torch.LongTensor(batch_masked_pos).cuda())
+        logits_lm = logits_lm.data.max(2)[1]
+        logits_lm = logits_lm.flatten().cpu().data.numpy()
+        predict.extend(list(logits_lm))
+    print(len(predict), masked_tokens.shape)
+    test_accuracy = accuracy_score(np.array(predict), masked_tokens)
+    print('test accracy =', '{:.6f}'.format(test_accuracy))
+
+
+test(test_token_list, test_masked_tokens, test_masked_pos)
