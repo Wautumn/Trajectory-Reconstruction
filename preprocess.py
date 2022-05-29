@@ -7,47 +7,47 @@ import time
 from utils import traj_to_slot
 
 
-def gen_data(path, train_prop=0.9):
-    names = ["0000" + str(i).zfill(2) + "_0" for i in range(2)]
-    format = '%Y-%m-%d %H:%M:%S'
-    seqs = []
-    for i in range(len(names)):
-        print(names[i])
-        record = []
-        abs_file = os.path.join(path, names[i])
-        data = pd.read_csv(abs_file, header=None)
-        data['timestamp'] = data[2].apply(lambda x: x + 1633017600)
-        data['datetime'] = data[2].apply(lambda x: time.strftime(format, time.localtime(x + 1633017600)))
-        data['day'] = pd.to_datetime(data['datetime'], errors='coerce').dt.day
-        data['user_index'] = data[0]
-        data['loc_index'] = data[1]
-        for (user_index, day), group in data.groupby(["user_index", 'day']):
-            if group.shape[0] < 12:
-                continue
-            group.sort_values(by="timestamp")
-            ts = group['timestamp'].astype(int).tolist()
-            seq = group['loc_index'].tolist()
-            seq = traj_to_slot(seq, ts, pad='[PAD]')
-            if seq.count('[PAD]') > 24:
-                continue
-            seq = [str(x) for x in seq]
-            record.append([seq, user_index, day])
-        seqs.extend(record)
-        print(abs_file + "," + str(len(record)))
-    all_length = len(seqs)
-    random.shuffle(seqs)
-    train_size = int(all_length * train_prop)
-    train_list = seqs[0:train_size]
-    test_list = seqs[train_size:]
-    train_token_set = set(str(train_list[i][0][j]) for i in range(len(train_list)) for j in range(len(train_list[i][0])))
-
-    print("All train length is " + str(len(seqs)))
-    seqs = pd.DataFrame(seqs)
-    indexes = ['trajectory', 'user_index', 'day']
-    seqs.columns = indexes
-    # h5 = pd.HDFStore('data/h5_data/%s.h5' % "train_trajectory", 'w')
-    # h5['data'] = seqs
-    # h5.close()
+# def gen_data(path, train_prop=0.9):
+#     names = ["0000" + str(i).zfill(2) + "_0" for i in range(2)]
+#     format = '%Y-%m-%d %H:%M:%S'
+#     seqs = []
+#     for i in range(len(names)):
+#         print(names[i])
+#         record = []
+#         abs_file = os.path.join(path, names[i])
+#         data = pd.read_csv(abs_file, header=None)
+#         data['timestamp'] = data[2].apply(lambda x: x + 1633017600)
+#         data['datetime'] = data[2].apply(lambda x: time.strftime(format, time.localtime(x + 1633017600)))
+#         data['day'] = pd.to_datetime(data['datetime'], errors='coerce').dt.day
+#         data['user_index'] = data[0]
+#         data['loc_index'] = data[1]
+#         for (user_index, day), group in data.groupby(["user_index", 'day']):
+#             if group.shape[0] < 12:
+#                 continue
+#             group.sort_values(by="timestamp")
+#             ts = group['timestamp'].astype(int).tolist()
+#             seq = group['loc_index'].tolist()
+#             seq = traj_to_slot(seq, ts, pad='[PAD]')
+#             if seq.count('[PAD]') > 24:
+#                 continue
+#             seq = [str(x) for x in seq]
+#             record.append([seq, user_index, day])
+#         seqs.extend(record)
+#         print(abs_file + "," + str(len(record)))
+#     all_length = len(seqs)
+#     random.shuffle(seqs)
+#     train_size = int(all_length * train_prop)
+#     train_list = seqs[0:train_size]
+#     test_list = seqs[train_size:]
+#     train_token_set = set(str(train_list[i][0][j]) for i in range(len(train_list)) for j in range(len(train_list[i][0])))
+#
+#     print("All train length is " + str(len(seqs)))
+#     seqs = pd.DataFrame(seqs)
+#     indexes = ['trajectory', 'user_index', 'day']
+#     seqs.columns = indexes
+#     # h5 = pd.HDFStore('data/h5_data/%s.h5' % "train_trajectory", 'w')
+#     # h5['data'] = seqs
+#     # h5.close()
 
 
 def gen_train_data(path):
@@ -160,7 +160,6 @@ class DataSet:
 
 
 if __name__ == '__main__':
-    gen_data('data/row_data')
     # gen_train_data("data/row_data")
     # gen_test_data("data/row_data", n_pred=5)
     # train_df = pd.read_hdf(os.path.join('data/h5_data', "train_trajectory" + ".h5"), key='data')
