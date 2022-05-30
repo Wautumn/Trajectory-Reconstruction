@@ -11,12 +11,12 @@ import torch.utils.data as Data
 from random import *
 
 from preprocess import DataSet
-from utils import traj_to_slot, next_batch
+from utils import traj_to_slot, next_batch, get_evalution
 
-# device = 'cuda:0'
+device = 'cuda:4'
 
 max_len = 50  # 轨迹的最大长度
-batch_size = 128
+batch_size = 768
 max_pred = 5  # max tokens of prediction
 n_layers = 6
 n_heads = 12
@@ -111,9 +111,9 @@ def make_train_data(token_list):
 
 batch = make_train_data(train_token_list)
 input_ids, masked_tokens, masked_pos = zip(*batch)
-input_ids, masked_tokens, masked_pos = torch.LongTensor(input_ids).cuda(), torch.LongTensor(
-    masked_tokens).cuda(), torch.LongTensor(
-    masked_pos).cuda()
+input_ids, masked_tokens, masked_pos = torch.LongTensor(input_ids).to(device), torch.LongTensor(
+    masked_tokens).to(device), torch.LongTensor(
+    masked_pos).to(device)
 
 
 class MyDataSet(Data.Dataset):
@@ -160,7 +160,7 @@ class Embedding(nn.Module):
     def forward(self, x):
         seq_len = x.size(1)
         pos = torch.arange(seq_len, dtype=torch.long)
-        pos = pos.unsqueeze(0).expand_as(x).cuda()  # [seq_len] -> [batch_size, seq_len]
+        pos = pos.unsqueeze(0).expand_as(x).to(device) # [seq_len] -> [batch_size, seq_len]
         self.tok_embed(x)
         self.pos_embed(pos)
         embedding = self.tok_embed(x) + self.pos_embed(pos)
@@ -203,7 +203,7 @@ class MultiHeadAttention(nn.Module):
         context = context.transpose(1, 2).contiguous().view(batch_size, -1,
                                                             n_heads * d_v)  # context: [batch_size, seq_len, n_heads * d_v]
         output = self.fc(context)
-        return nn.LayerNorm(d_model).cuda()(output + residual)  # output: [batch_size, seq_len, d_model]
+        return nn.LayerNorm(d_model).to(device)(output + residual)  # output: [batch_size, seq_len, d_model]
 
 
 class PoswiseFeedForwardNet(nn.Module):
@@ -265,13 +265,13 @@ class BERT(nn.Module):
         return logits_lm
 
 
-model = BERT().cuda()
+model = BERT().to(device)
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adadelta(model.parameters(), lr=0.001)
 
 train_predict = []
 train_truth = []
-for epoch in range(5000):
+for epoch in range(1000):
     train_predict, train_truth = [], []
     for input_ids, masked_tokens, masked_pos in loader:
         logits_lm = model(input_ids, masked_pos)
@@ -302,17 +302,23 @@ def test(test_token_list, test_masked_tokens, test_masked_pos):
     a = list(zip(test_token_list, test_masked_pos))
     truth = []
     predict = []
+    predict_prob = torch.Tensor([]).to(device)
 
     for batch in next_batch(a, batch_size=32):
         # Value filled with num_loc stands for masked tokens that shouldn't be considered.
         batch_token_list, batch_masked_pos = zip(*batch)
-        logits_lm = model(torch.LongTensor(batch_token_list).cuda(), torch.LongTensor(batch_masked_pos).cuda())
+        logits_lm = model(torch.LongTensor(batch_token_list).to(device), torch.LongTensor(batch_masked_pos).to(device))
+        predict_prob = torch.cat([predict_prob, logits_lm], dim=0)
         logits_lm = logits_lm.data.max(2)[1]
         logits_lm = logits_lm.flatten().cpu().data.numpy()
         predict.extend(list(logits_lm))
-    print(len(predict), masked_tokens.shape)
-    test_accuracy = accuracy_score(np.array(predict), masked_tokens)
-    print('test accracy =', '{:.6f}'.format(test_accuracy))
+    # print(len(predict), masked_tokens.shape)
+    # test_accuracy = accuracy_score(np.array(predict), masked_tokens)
+    # print('test accracy =', '{:.6f}'.format(test_accuracy))
+    accuracy_score, recall3_score, recall5_score = get_evalution(ground_truth=masked_tokens, logits_lm=predict_prob)
+    print('test accuracy score =', '{:.6f}'.format(accuracy_score))
+    print('test recall3 score =', '{:.6f}'.format(recall3_score))
+    print('test recall5 score =', '{:.6f}'.format(recall5_score))
 
 
 test(test_token_list, test_masked_tokens, test_masked_pos)
