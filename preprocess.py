@@ -116,6 +116,19 @@ class DataSet:
         self.train_df = train_df
         self.test_df = test_df
 
+    def gen_all_data(self):
+        # ['trajectory', 'user_index', 'day']
+        records = []
+        for index, row in self.train_df.iterrows():
+            seq, user_index, day = row['trajectory'], row['user_index'], row['day']
+            records.append(seq)
+        for index, row in self.test_df.iterrows():
+            seq, user_index, day = row['trajectory'], row['user_index'], row['day']
+            seq = list(seq.split())
+            records.append(seq)
+        print("All data length is " + str(len(records)))
+        return records
+
     def gen_train_data(self):
         # ['trajectory', 'user_index', 'day']
         records = []

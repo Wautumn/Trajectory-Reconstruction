@@ -1,3 +1,4 @@
+import datetime
 import os
 import torch
 import torch.nn as nn
@@ -13,37 +14,22 @@ from utils import next_batch, get_evalution, make_exchange_matrix, Loss_Function
 from downstream.bert import BERT
 
 device = 'cuda:3'
-
-test_index = 4
-
 batch_size = 512
-epoch_size = 2000
+epoch_size = 5000
 max_pred = 5  # max tokens of prediction
-loss_fun = "spatial_loss"  # loss
+loss_fun = "spatial_loss"  # loss&spatial_loss
 # n_segments = 2
 
-train_df = pd.read_hdf(os.path.join('data/h5_data_all', "train_traj" + ".h5"), key='data')
-test_df_1 = pd.read_hdf(os.path.join('data/h5_data_all', "test_traj_1" + ".h5"), key='data')
-test_df_2 = pd.read_hdf(os.path.join('data/h5_data_all', "test_traj_2" + ".h5"), key='data')
-test_df_3 = pd.read_hdf(os.path.join('data/h5_data_all', "test_traj_3" + ".h5"), key='data')
-test_df_4 = pd.read_hdf(os.path.join('data/h5_data_all', "test_traj_4" + ".h5"), key='data')
-
-dataset = DataSet(train_df, test_df_1, test_df_2, test_df_3, test_df_4)
+train_df = pd.read_hdf(os.path.join('data/Dataset Filtered h5', "train_traj" + ".h5"), key='data')
+test_df = pd.read_hdf(os.path.join('data/Dataset Filtered h5', "test_traj" + ".h5"), key='data')
+dataset = DataSet(train_df, test_df)
+# all_data = dataset.gen_all_data()
 train_data = dataset.gen_train_data()
-test_data = dataset.gen_test_data(index=1)
+test_data = dataset.gen_test_data()
 
 train_word_list = list(
     set(str(train_data[i][j]) for i in range(len(train_data)) for j in range(len(train_data[i]))))
-test_word_list = list(
-    set(str(test_data[i][0][j]) for i in range(len(test_data)) for j in range(len(test_data[i][0]))))
-test_masked_list = list(
-    set(str(test_data[i][2][j]) for i in range(len(test_data)) for j in range(len(test_data[i][2]))))
-word_list = []
-word_list.extend(train_word_list)
-word_list.extend(test_word_list)
-word_list.extend(test_masked_list)
-word_list = list(set(word_list))
-
+word_list = list(set(train_word_list))
 
 word2idx = {'[PAD]': 0, '[CLS]': 1, '[SEP]': 2, '[MASK]': 3}
 for i, w in enumerate(word_list):
@@ -52,6 +38,11 @@ for i, w in enumerate(word_list):
 
 idx2word = {i: w for i, w in enumerate(word2idx)}
 vocab_size = len(word2idx) + 2
+
+# all_token_list = list()
+# for sentence in all_data:
+#     arr = [word2idx[s] for s in sentence]
+#     all_token_list.append(arr)
 
 train_token_list = list()
 for sentence in train_data:
@@ -68,7 +59,7 @@ for sentence in test_data:
     test_token_list.append(arr)
     masked = [word2idx[str(s)] for s in sentence[2]]
     test_masked_tokens.append(masked)
-    test_masked_pos.append(sentence[1])
+    test_masked_pos.append([pos + 1 for pos in sentence[1]])
 
 
 def make_train_data(token_list):
@@ -166,15 +157,12 @@ for epoch in range(epoch_size):
         optimizer.step()
 
 torch.save({'model': model.state_dict()},
-           'pth/dataset%s-batch%s-epoch%s-%s.pth' % (test_index, batch_size, epoch_size, loss_fun))
+           'pth/dataset-batch%s-epoch%s-%s-%s.pth' % (
+           batch_size, epoch_size, loss_fun, datetime.datetime.now().strftime("%Y%m%d")))
+
 
 # state_dict = torch.load('model/model_name.pth')
 # model.load_state_dict(state_dict['model'])
-
-# test_token_list, test_masked_tokens, test_masked_pos
-for i in range(len(test_masked_pos)):
-    for j in range(len(test_masked_pos[i])):
-        test_masked_pos[i][j] += 1
 
 
 def test(test_token_list, test_masked_tokens, test_masked_pos):
@@ -182,24 +170,28 @@ def test(test_token_list, test_masked_tokens, test_masked_pos):
     masked_tokens = np.array(test_masked_tokens).reshape(-1)
     # masked_pos = np.array(test_masked_pos)
     a = list(zip(test_token_list, test_masked_pos))
-    truth = []
-    # predict = []
     predict_prob = torch.Tensor([]).to(device)
 
     for batch in next_batch(a, batch_size=64):
         # Value filled with num_loc stands for masked tokens that shouldn't be considered.
         batch_token_list, batch_masked_pos = zip(*batch)
         logits_lm = model(torch.LongTensor(batch_token_list).to(device), torch.LongTensor(batch_masked_pos).to(device))
-        logits_lm = torch.topk(logits_lm, 10, dim=2)[1]
+        logits_lm = torch.topk(logits_lm, 100, dim=2)[1]
         predict_prob = torch.cat([predict_prob, logits_lm], dim=0)
         # logits_lm = logits_lm.data.max(2)[1]
         # logits_lm = logits_lm.flatten().cpu().data.numpy()
         # predict.extend(list(logits_lm))
 
-    accuracy_score, recall3_score, recall5_score = get_evalution(ground_truth=masked_tokens, logits_lm=predict_prob)
+    accuracy_score, fuzzzy_score, top3_score, top5_score, top10_score, top30_score, top50_score, top100_score = get_evalution(
+        ground_truth=masked_tokens, logits_lm=predict_prob, exchange_matrix=exchange_map)
     print('test accuracy score =', '{:.6f}'.format(accuracy_score))
-    print('test recall3 score =', '{:.6f}'.format(recall3_score))
-    print('test recall5 score =', '{:.6f}'.format(recall5_score))
+    print('fuzzzy score =', '{:.6f}'.format(fuzzzy_score))
+    print('test top3 score =', '{:.6f}'.format(top3_score))
+    print('test top5 score =', '{:.6f}'.format(top5_score))
+    print('test top10 score =', '{:.6f}'.format(top10_score))
+    print('test top30 score =', '{:.6f}'.format(top30_score))
+    print('test top50 score =', '{:.6f}'.format(top50_score))
+    print('test top100 score =', '{:.6f}'.format(top100_score))
 
 
 test(test_token_list, test_masked_tokens, test_masked_pos)

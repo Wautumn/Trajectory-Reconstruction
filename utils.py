@@ -56,47 +56,58 @@ def traj_to_slot(trajectory, ts, pad=0):
     return ans
 
 
-def get_evalution(ground_truth, logits_lm):
-    '''
-    :param ground_truth: true token
-    :param logits_lm: predict logits [length,masked_len,vocab_size]
-    :return: accuracy，recall_3、recall_5、map
-    '''
-    # accuracy
-    # pred_acc = logits_lm.data.max(2)[1]
-    # pred_acc = torch.topk(logits_lm, 1, dim=2)[1]
+def topk(ground_truth, logits_lm, k):
+    pred_topk = logits_lm[:, :, 0:k]
+    pred_topk = torch.flatten(pred_topk, start_dim=0, end_dim=1).cpu().data.numpy()
+    topk_token = 0
+    for i in range(len(ground_truth)):
+        if ground_truth[i] in pred_topk[i]:
+            topk_token += 1
+    topk_score = topk_token / len(ground_truth)
+    return topk_token, topk_score
+
+
+def get_evalution(ground_truth, logits_lm, exchange_matrix):
     pred_acc = logits_lm[:, :, 0]
     pred_acc = pred_acc.flatten().cpu().data.numpy()
     accuracy_token = 0
     for i in range(len(ground_truth)):
         if pred_acc[i] == ground_truth[i]:
             accuracy_token += 1
-    print(accuracy_token, accuracy_token / len(ground_truth))
+    print("accuracy:", accuracy_token, accuracy_token / len(ground_truth))
     accuracy_score = accuracy_token / len(ground_truth)
 
-    # recall3
-    # pred_recall3 = torch.topk(logits_lm, 3, dim=2)[1]
-    pred_recall3 = logits_lm[:, :, 0:3]
-    pred_recall3 = torch.flatten(pred_recall3, start_dim=0, end_dim=1).cpu().data.numpy()
-    recall3_token = 0
-    for i in range(len(ground_truth)):
-        if ground_truth[i] in pred_recall3[i]:
-            recall3_token += 1
-    print(recall3_token, recall3_token / len(ground_truth))
-    recall3_score = recall3_token / len(ground_truth)
+    pred_acc = logits_lm[:, :, 0]
+    pred_acc = pred_acc.flatten().cpu().data.numpy()
 
-    # recall5
-    # pred_recall5 = torch.topk(logits_lm, 5, dim=2)[1]
-    pred_recall5 = logits_lm[:, :, 0:5]
-    pred_recall5 = torch.flatten(pred_recall5, start_dim=0, end_dim=1).cpu().data.numpy()
-    recall5_token = 0
-    for i in range(len(ground_truth)):
-        if ground_truth[i] in pred_recall5[i]:
-            recall5_token += 1
-    print(recall5_token, recall5_token / len(ground_truth))
-    recall5_score = recall5_token / len(ground_truth)
+    funzzy_accuracy_token = 0
+    for i in range(len(pred_acc)):
+        a = int(pred_acc[i])
+        b = ground_truth[i]
+        if exchange_matrix[b][a] > 0:
+            funzzy_accuracy_token += 1
+    print("fuzzzy:", funzzy_accuracy_token, funzzy_accuracy_token / len(ground_truth))
+    fuzzzy_score = funzzy_accuracy_token / len(ground_truth)
 
-    return accuracy_score, recall3_score, recall5_score
+    top3_token, top3_score = topk(ground_truth, logits_lm, 3)
+    print("top3:", top3_token, top3_score)
+
+    top5_token, top5_score = topk(ground_truth, logits_lm, 5)
+    print("top5:", top5_token, top5_score)
+
+    top10_token, top10_score = topk(ground_truth, logits_lm, 10)
+    print("top10:", top10_token, top10_score)
+
+    top30_token, top30_score = topk(ground_truth, logits_lm, 30)
+    print("top30:", top30_token, top30_score)
+
+    top50_token, top50_score = topk(ground_truth, logits_lm, 50)
+    print("top50:", top50_token, top50_score)
+
+    top100_token, top100_score = topk(ground_truth, logits_lm, 100)
+    print("top100:", top100_token, top100_score)
+
+    return accuracy_score, fuzzzy_score, top3_score, top5_score, top10_score, top30_score, top50_score, top100_score
 
 
 class Loss_Function(nn.Module):
@@ -106,10 +117,6 @@ class Loss_Function(nn.Module):
     def Spatial_Loss(self, weight, logit_lm, ground_truth):
         _, num_classes = logit_lm.size()
         p_i = torch.softmax(logit_lm, dim=1)
-        # spatial_softmax = torch.softmax(weight, dim=1)
-
-        # spatial_matrix = torch.Tensor([weight[item].data.cpu().numpy() for item in ground_truth]).to(device)
-        # spatial_matrix =weight[item] for item in ground_truth
         spatial_matrix = torch.index_select(weight, 0, ground_truth)
 
         loss = spatial_matrix * torch.log(p_i + 0.0000001)
@@ -127,22 +134,25 @@ class Loss_Function(nn.Module):
         return loss
 
 
-def make_exchange_matrix(token_list, token_size):
+def make_exchange_matrix(token_list, token_size, alpha=98, theta=1000):
     token_list = [list(filter(lambda x: x > 3, token)) for token in token_list]
-    exchange_matrix = [[0] * token_size for _ in range((token_size))]
+    exchange_matrix = np.zeros(shape=(token_size, token_size))
     for token in token_list:
         for i in range(1, len(token)):
             if token[i] == token[i - 1]:
                 continue
             exchange_matrix[token[i - 1]][token[i]] += 1
-    # for i in range(token_size):
-    #     for j in range(token_size):
-    #         if exchange_matrix[i][j] != 0:
-    #             exchange_matrix[i][j] = np.exp(exchange_matrix[i][j])
+    print(np.min(exchange_matrix), np.max(exchange_matrix))
+    exchange_matrix = np.where(exchange_matrix >= alpha, exchange_matrix, 0)
+    exchange_matrix = exchange_matrix / theta
+    exchange_matrix = np.where(exchange_matrix > 0, np.exp(exchange_matrix), 0)
+    print(np.min(exchange_matrix), np.max(exchange_matrix))
     for i in range(token_size):
+        row_sum = sum(exchange_matrix[i]) + np.exp(1)
         for j in range(token_size):
             if exchange_matrix[i][j] != 0:
-                exchange_matrix[i][j] = exchange_matrix[i][j] / sum(exchange_matrix[i])
+                exchange_matrix[i][j] = exchange_matrix[i][j] / row_sum
+    print(np.min(exchange_matrix), np.max(exchange_matrix))
     for i in range(token_size):
         exchange_matrix[i][i] = 1
     return exchange_matrix
