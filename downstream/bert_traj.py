@@ -3,13 +3,16 @@ import torch.nn as nn
 import numpy as np
 import math
 
-device = 'cuda:1'
+device = 'cuda:5'
+# device = 'cpu'
+
 n_layers = 6
 n_heads = 12
 d_model = 768
 d_ff = 768 * 4  # 4*d_model, FeedForward dimension
 d_k = d_v = 64  # dimension of K(=Q), V
-max_len = 50  # 轨迹的最大长度
+max_len = 99  # 轨迹的最大长度
+n_segments = 2
 
 
 def get_attn_pad_mask(seq_q, seq_k):
@@ -34,16 +37,17 @@ class Embedding(nn.Module):
         super(Embedding, self).__init__()
         self.tok_embed = nn.Embedding(vocab_size, d_model)  # token embedding
         self.pos_embed = nn.Embedding(max_len, d_model)  # position embedding
-        # self.seg_embed = nn.Embedding(n_segments, d_model)  # segment(token type) embedding
+        self.seg_embed = nn.Embedding(n_segments, d_model)  # segment(token type) embedding
         self.norm = nn.LayerNorm(d_model)
 
-    def forward(self, x):
+    def forward(self, x, seg):
         seq_len = x.size(1)
         pos = torch.arange(seq_len, dtype=torch.long)
         pos = pos.unsqueeze(0).expand_as(x).to(device)  # [seq_len] -> [batch_size, seq_len]
         self.tok_embed(x)
         self.pos_embed(pos)
-        embedding = self.tok_embed(x) + self.pos_embed(pos)
+        self.seg_embed(seg)
+        embedding = self.tok_embed(x) + self.pos_embed(pos) + self.seg_embed(seg)
         return self.norm(embedding)
 
 
@@ -129,18 +133,18 @@ class BERT(nn.Module):
         self.fc2 = nn.Linear(d_model, vocab_size, bias=False)
         self.fc2.weight = embed_weight
 
-    def forward(self, input_ids, masked_pos):
-        output = self.embedding(input_ids)  # [bach_size, seq_len, d_model]
+    def forward(self, input_ids, segment_ids, masked_pos):
+        output = self.embedding(input_ids, segment_ids)  # [bach_size, seq_len, d_model]
         enc_self_attn_mask = get_attn_pad_mask(input_ids, input_ids)  # [batch_size, maxlen, maxlen]
         for layer in self.layers:
             # output: [batch_size, max_len, d_model]
             output = layer(output, enc_self_attn_mask)
         # it will be decided by first token(CLS)
-        # h_pooled = self.fc(output[:, 0])  # [batch_size, d_model]
-        # logits_clsf = self.classifier(h_pooled)  # [batch_size, 2] predict isNext
+        h_pooled = self.fc(output[:, 0])  # [batch_size, d_model]
+        logits_clsf = self.classifier(h_pooled)  # [batch_size, 2] predict isNext
 
         masked_pos = masked_pos[:, :, None].expand(-1, -1, d_model)  # [batch_size, max_pred, d_model]
         h_masked = torch.gather(output, 1, masked_pos)  # masking position [batch_size, max_pred, d_model]
         h_masked = self.activ2(self.linear(h_masked))  # [batch_size, max_pred, d_model]
         logits_lm = self.fc2(h_masked)  # [batch_size, max_pred, vocab_size]
-        return logits_lm
+        return logits_lm, logits_clsf

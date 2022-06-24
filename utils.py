@@ -86,7 +86,7 @@ def get_evalution(ground_truth, logits_lm, exchange_matrix):
         b = ground_truth[i]
         if exchange_matrix[b][a] > 0:
             funzzy_accuracy_token += 1
-    print("fuzzzy:", funzzy_accuracy_token, funzzy_accuracy_token / len(ground_truth))
+    print("fuzzy:", funzzy_accuracy_token, funzzy_accuracy_token / len(ground_truth))
     fuzzzy_score = funzzy_accuracy_token / len(ground_truth)
 
     top3_token, top3_score = topk(ground_truth, logits_lm, 3)
