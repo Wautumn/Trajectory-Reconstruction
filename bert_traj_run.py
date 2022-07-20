@@ -19,13 +19,13 @@ device = 'cuda:5'
 
 
 batch_size = 256
-epoch_size = 20
+epoch_size = 300
 max_pred = 5  # max tokens of prediction
 loss_fun = "loss"  # loss or spatial_loss
 n_segments = 2
 
-train_df = pd.read_hdf(os.path.join('data/Dataset Filtered h5', "train_traj" + ".h5"), key='data')
-test_df = pd.read_hdf(os.path.join('data/Dataset Filtered h5', "test_traj" + ".h5"), key='data')
+train_df = pd.read_hdf(os.path.join('data/Dataset Filtered 2 h5', "train_traj_5" + ".h5"), key='data')
+test_df = pd.read_hdf(os.path.join('data/Dataset Filtered 2 h5', "test_traj_5" + ".h5"), key='data')
 dataset = DataSet(train_df, test_df)
 # all_data = dataset.gen_all_data()
 train_data = dataset.gen_train_data_and_user()  # [trajectory，user_index，day]
@@ -264,7 +264,7 @@ for epoch in range(epoch_size):
 
 
 torch.save({'model': model.state_dict()},
-           'pth/bert_traj_dataset-batch%s-epoch%s-%s-%s.pth' % (
+           'pth_traj/bert_traj_dataset-batch%s-epoch%s-%s-%s.pth' % (
                batch_size, epoch_size, loss_fun, datetime.datetime.now().strftime("%Y%m%d")))
 
 # state_dict = torch.load('model/model_name.pth')

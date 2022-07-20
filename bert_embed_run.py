@@ -19,13 +19,14 @@ import config as gl
 parser = argparse.ArgumentParser()
 parser.add_argument('--device', default=1, type=int, help='train device')
 parser.add_argument('--bs', default=256, type=int, help='batch size')
-parser.add_argument('--epoch', default=50, type=int, help='epoch size')
+parser.add_argument('--epoch', default=1, type=int, help='epoch size')
 parser.add_argument('--loss', default='loss', type=str, help='loss fun')
 parser.add_argument('--dataset', default='5', type=str, help='dataset')
+parser.add_argument('--embed', default='4', type=str, help='cell id embed')
 
-parser.add_argument('--d_model', default=768, type=int, help='embed size')
-parser.add_argument('--head', default=12, type=int, help='multi head num')
-parser.add_argument('--layer', default=6, type=int, help='layer')
+parser.add_argument('--d_model', default=1024, type=int, help='embed size')
+parser.add_argument('--head', default=2, type=int, help='multi head num')
+parser.add_argument('--layer', default=2, type=int, help='layer')
 
 args = parser.parse_args()
 
@@ -41,6 +42,7 @@ epoch_size = args.epoch
 loss_fun = args.loss  # loss and spatial_loss
 train_dataset = "train_traj_%s.h5" % args.dataset
 test_dataset = "test_traj_%s.h5" % args.dataset
+embed_index = int(args.embed)
 
 d_model = args.d_model
 head = args.head
@@ -50,6 +52,38 @@ gl.set_value('d_model', d_model)
 gl.set_value('head', head)
 gl.set_value('layer', layer)
 gl.set_value('device', device)
+
+embed_path = 'data/embed/'
+if embed_index == 1:
+    embed_file = 'embedding_dynamic_poi_glove.npy'
+elif embed_index == 2:
+    embed_file = 'embedding_graph_dynamic_poi_glove.npy'
+elif embed_index == 3:
+    embed_file = 'embedding_graph_poi_glove.npy'
+elif embed_index == 4:
+    embed_file = 'embedding_poi_glove.npy'
+elif embed_index == 4:
+    embed_file = 'embedding_poi_glove.npy'
+
+elif embed_index == 5:
+    embed_file = 'embedding_graph_dynamic_poi_64.npy'
+elif embed_index == 6:
+    embed_file = 'embedding_graph_dynamic_poi_128.npy'
+elif embed_index == 7:
+    embed_file = 'embedding_graph_dynamic_poi_256.npy'
+elif embed_index == 8:
+    embed_file = 'embedding_graph_dynamic_poi_512.npy'
+elif embed_index == 9:
+    embed_file = 'embedding_graph_dynamic_poi_1024.npy'
+elif embed_index == 10:
+    embed_file = 'embedding_graph_dynamic_poi_glove_1024.npy'
+elif embed_index == 11:
+    embed_file = 'embedding_dynamic_poi.npy'
+else:
+    embed_file = "error"
+embed_npy = np.load(embed_path + embed_file)
+embed_size = embed_npy.shape[1]
+gl.set_value('d_model', embed_size)
 
 max_pred = 5  # max tokens of prediction
 train_df = pd.read_hdf(os.path.join('data/Dataset Filtered 2 h5', train_dataset), key='data')
@@ -61,21 +95,36 @@ test_data = dataset.gen_test_data()  # [seq, masked_pos, masked_tokens, user_ind
 
 train_word_list = list(
     set(str(train_data[i][0][j]) for i in range(len(train_data)) for j in range(len(train_data[i][0]))))
-word_list = list(set(train_word_list))
+train_word_list.remove('[PAD]')
+train_word_list_int = [int(train_word_list[i]) for i in range(len(train_word_list))]
+train_word_list_int.sort()
+word2embed = dict()
+for i, loc in enumerate(train_word_list_int):
+    word2embed[str(loc)] = embed_npy[i]
+word2embed['[PAD]'] = np.ones(shape=(embed_size,))
+word2embed['[MASK]'] = np.ones(shape=(embed_size,))
+word2embed['[CLS]'] = np.ones(shape=(embed_size,))
+word2embed['[SEP]'] = np.ones(shape=(embed_size,))
 
 word2idx = {'[PAD]': 0, '[CLS]': 1, '[SEP]': 2, '[MASK]': 3}
-for i, w in enumerate(word_list):
-    if w != '[PAD]' and w != '[MASK]':
-        word2idx[w] = i + 4
+for i, w in enumerate(train_word_list_int):
+    if w == '[PAD]' or w == '[MASK]':
+        print("error")
+    word2idx[str(w)] = i + 4
 
 idx2word = {i: w for i, w in enumerate(word2idx)}
+idx2embed = {i: word2embed[w] for i, w in enumerate(word2idx)}
+idx2embed = torch.from_numpy(np.array(list(idx2embed.values())).astype(float))
 vocab_size = len(word2idx) + 2
 
 train_token_list = list()
 train_user_list = list()
 train_day_list = list()
+max_value = 0
 for sentence in train_data:
     seq, user_index, day = sentence
+    for s in seq:
+        max_value = max(max_value, word2idx[s])
     arr = [word2idx[s] for s in seq]
     train_token_list.append(arr)
     train_user_list.append(user_index)
@@ -83,16 +132,6 @@ for sentence in train_data:
 
 exchange_map = make_exchange_matrix(token_list=train_token_list, token_size=vocab_size)
 exchange_map = torch.Tensor(exchange_map).to(device)
-
-
-# test_token_list, test_masked_tokens, test_masked_pos = list(), list(), list()
-# for sentence in test_data:
-#     arr = [word2idx[s] for s in sentence[0]]
-#     arr = [word2idx['[CLS]']] + arr + [word2idx['[SEP]']]
-#     test_token_list.append(arr)
-#     masked = [word2idx[str(s)] for s in sentence[2]]
-#     test_masked_tokens.append(masked)
-#     test_masked_pos.append([pos + 1 for pos in sentence[1]])
 
 
 def make_train_data(token_list):
@@ -112,13 +151,14 @@ def make_train_data(token_list):
         for pos in cand_maked_pos[:n_pred]:
             masked_pos.append(pos)
             masked_tokens.append(input_ids[pos])
-            if random() < 0.8:  # 80%
-                input_ids[pos] = word2idx['[MASK]']  # make mask
-            elif random() > 0.9:  # 10%
-                index = randint(0, vocab_size - 1)  # random index in vocabulary
-                while index < 4:  # can't involve 'CLS', 'SEP', 'PAD'
-                    index = randint(0, vocab_size - 1)
-                input_ids[pos] = index  # replace
+            input_ids[pos] = word2idx['[MASK]']  # make mask
+            # if random() < 0.8:  # 80%
+            #     input_ids[pos] = word2idx['[MASK]']  # make mask
+            # elif random() > 0.9:  # 10%
+            #     index = randint(0, vocab_size - 1)  # random index in vocabulary
+            #     while index < 4:  # can't involve 'CLS', 'SEP', 'PAD'
+            #         index = randint(0, vocab_size - 1)
+            #     input_ids[pos] = index  # replace
         if max_pred > n_pred:
             n_pad = max_pred - n_pred
             masked_tokens.extend([0] * n_pad)
@@ -166,9 +206,9 @@ class MyDataSet(Data.Dataset):
 
 
 loader = Data.DataLoader(MyDataSet(input_ids, masked_tokens, masked_pos, user_ids, day_ids), batch_size, True)
-from downstream.bert import BERT
+from downstream.bert_embed import BERT
 
-model = BERT(vocab_size=vocab_size).to(device)
+model = BERT(vocab_size=vocab_size, id2embed=idx2embed).to(device)
 if loss_fun == "spatial_loss":
     criterion = Loss_Function()
 else:
@@ -200,8 +240,9 @@ for epoch in range(epoch_size):
         #     break
 
 torch.save({'model': model.state_dict()},
-           'pth-embed/dataset-batch%s-epoch%s-%s-dmodel%s-head%s_layer%s_%s.pth' % (
-               batch_size, epoch_size, loss_fun, d_model, head, layer, datetime.datetime.now().strftime("%Y%m%d")))
+           'pth_embed/dataset-batch%s-epoch%s-%s-dmodel%s-head%s_layer%s_embed%s_%s_%s.pth' % (
+               batch_size, epoch_size, loss_fun, d_model, head, layer, embed_index, embed_file.replace(".npy", ""),
+               datetime.datetime.now().strftime("%Y%m%d")))
 
 # state_dict = torch.load('pth/dataset-batch256-epoch50-loss-20220707_tem_without_pos.pth.pth')
 # model.load_state_dict(state_dict['model'])

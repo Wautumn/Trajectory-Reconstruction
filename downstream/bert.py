@@ -2,14 +2,22 @@ import torch
 import torch.nn as nn
 import numpy as np
 import math
+import config as gl
 
-device = 'cuda:1'
-n_layers = 6
-n_heads = 12
-d_model = 768
+# device = 'cuda:1'
+# n_layers = 6
+# n_heads = 12
+# d_model = 768
+device = gl.get_value('device')
+n_layers = gl.get_value('layer')
+d_model = gl.get_value('d_model')
+n_heads = gl.get_value('head')
+
 d_ff = 768 * 4  # 4*d_model, FeedForward dimension
 d_k = d_v = 64  # dimension of K(=Q), V
 max_len = 50  # 轨迹的最大长度
+temp_size = 31  # day 的个数
+user_size = 10000  # user的个数
 
 
 def get_attn_pad_mask(seq_q, seq_k):
@@ -29,21 +37,49 @@ def gelu(x):
     return x * 0.5 * (1.0 + torch.erf(x / math.sqrt(2.0)))
 
 
+class PositionalEncoding(nn.Module):
+    def __init__(self, max_len, embed_size):
+        super().__init__()
+        pe = torch.zeros(max_len, embed_size).float()
+        pe.requires_grad = False
+
+        position = torch.arange(0, max_len).float().unsqueeze(1)
+        div_term = (torch.arange(0, embed_size, 2).float() * -(math.log(10000.0) / embed_size)).exp()
+
+        pe[:, 0::2] = torch.sin(position * div_term)
+        pe[:, 1::2] = torch.cos(position * div_term)
+
+        pe = pe.unsqueeze(0)
+        self.register_buffer('pe', pe)
+
+    def forward(self, x):
+        ans = self.pe[:, :x.size(1)]
+        return self.pe[:, :x.size(1)]
+        # return self.pe[:, :x.size(1)]
+
+
 class Embedding(nn.Module):
     def __init__(self, vocab_size):
         super(Embedding, self).__init__()
         self.tok_embed = nn.Embedding(vocab_size, d_model)  # token embedding
-        self.pos_embed = nn.Embedding(max_len, d_model)  # position embedding
-        # self.seg_embed = nn.Embedding(n_segments, d_model)  # segment(token type) embedding
+        # self.pos_embed = nn.Embedding(max_len, d_model)  # position embedding
+        self.pos_embed = PositionalEncoding(max_len, d_model)
+        self.tem_embed = nn.Embedding(temp_size, d_model)
+        self.user_embed = nn.Embedding(user_size, d_model)
+
         self.norm = nn.LayerNorm(d_model)
 
-    def forward(self, x):
+    def forward(self, x, user=None, temporal=None):
         seq_len = x.size(1)
         pos = torch.arange(seq_len, dtype=torch.long)
         pos = pos.unsqueeze(0).expand_as(x).to(device)  # [seq_len] -> [batch_size, seq_len]
-        self.tok_embed(x)
-        self.pos_embed(pos)
+
         embedding = self.tok_embed(x) + self.pos_embed(pos)
+        # user = user.unsqueeze(1).expand_as(x).to(device)
+        # temporal = temporal.unsqueeze(1).expand_as(x).to(device)
+        # a = self.user_embed(user)
+        # b = self.tem_embed(temporal)
+        # embedding = embedding + self.tem_embed(user)
         return self.norm(embedding)
 
 
@@ -129,8 +165,8 @@ class BERT(nn.Module):
         self.fc2 = nn.Linear(d_model, vocab_size, bias=False)
         self.fc2.weight = embed_weight
 
-    def forward(self, input_ids, masked_pos):
-        output = self.embedding(input_ids)  # [bach_size, seq_len, d_model]
+    def forward(self, input_ids, masked_pos, user_ids=None, temp_ids=None):
+        output = self.embedding(input_ids, user_ids, temp_ids)  # [bach_size, seq_len, d_model]
         enc_self_attn_mask = get_attn_pad_mask(input_ids, input_ids)  # [batch_size, maxlen, maxlen]
         for layer in self.layers:
             # output: [batch_size, max_len, d_model]
