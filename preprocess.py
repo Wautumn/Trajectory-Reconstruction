@@ -33,7 +33,7 @@ def gen_all_traj(file_path, file_name):
     seqs = pd.DataFrame(seqs)
     indexes = ['trajectory', 'user_index', 'day']
     seqs.columns = indexes
-    h5 = pd.HDFStore('data/Dataset Filtered h5/%s.h5' % "all_traj", 'w')
+    h5 = pd.HDFStore('data/Dataset Filtered 2 h5/%s.h5' % "all_traj", 'w')
     h5['data'] = seqs
     h5.close()
 
@@ -67,7 +67,7 @@ class ConstructDataSet:
         train_data = pd.DataFrame(self.train_seq)
         indexes = ['trajectory', 'user_index', 'day']
         train_data.columns = indexes
-        h5 = pd.HDFStore('data/Dataset Filtered h5/%s.h5' % "train_traj", 'w')
+        h5 = pd.HDFStore('data/Dataset Filtered 2 h5/%s.h5' % "train_traj_%s" % self.n_pred, 'w')
         h5['data'] = train_data
         h5.close()
 
@@ -75,7 +75,7 @@ class ConstructDataSet:
         masked_test_data = pd.DataFrame(masked_test_data)
         indexes = ['trajectory', 'masked_pos', 'masked_tokens', 'user_index', 'day']
         masked_test_data.columns = indexes
-        h5 = pd.HDFStore('data/Dataset Filtered h5/%s.h5' % name, 'w')
+        h5 = pd.HDFStore('data/Dataset Filtered 2 h5/%s.h5' % name, 'w')
         h5['data'] = masked_test_data
         h5.close()
 
@@ -107,7 +107,7 @@ class ConstructDataSet:
 
         masked_test_record = self.masked_test_seqs(test_record)
         print("All test length is " + str(len(masked_test_record)))
-        self.store_test_data(masked_test_data=masked_test_record, name="test_traj")
+        self.store_test_data(masked_test_data=masked_test_record, name="test_traj_%s" % self.n_pred)
         return self.train_seq, masked_test_record
 
 
@@ -134,7 +134,7 @@ class DataSet:
         records = []
         for index, row in self.train_df.iterrows():
             seq, user_index, day = row['trajectory'], row['user_index'], row['day']
-            records.append(seq)
+            records.append([seq, user_index, day])
         print("All train length is " + str(len(records)))
         return records
 
@@ -144,24 +144,47 @@ class DataSet:
         records = []
         for index, row in test_df.iterrows():
             seq, masked_pos, masked_tokens = row['trajectory'], row['masked_pos'], row['masked_tokens']
+            user_index, day = row['user_index'], row['day']
             seq, masked_pos, masked_tokens = list(seq.split()), list(map(int, masked_pos.split())), \
                                              list(map(int, masked_tokens.split()))
-            records.append([seq, masked_pos, masked_tokens])
+            records.append([seq, masked_pos, masked_tokens, user_index, day])
+        print("All test length is " + str(len(records)))
+        return records
+
+    def gen_train_data_and_user(self):
+        # ['trajectory', 'user_index', 'day']
+        records = []
+        for index, row in self.train_df.iterrows():
+            seq, user_index, day = row['trajectory'], row['user_index'], row['day']
+            records.append([seq, user_index])
+        print("All train length is " + str(len(records)))
+        return records
+
+    def gen_test_data_and_user(self):
+        # ['trajectory', 'masked_pos', 'masked_tokens']
+        test_df = self.test_df
+        records = []
+        for index, row in test_df.iterrows():
+            seq, masked_pos, masked_tokens = row['trajectory'], row['masked_pos'], row['masked_tokens']
+            user_index, day = row['user_index'], row['day']
+            seq, masked_pos, masked_tokens = list(seq.split()), list(map(int, masked_pos.split())), \
+                                             list(map(int, masked_tokens.split()))
+            records.append([seq, masked_pos, masked_tokens, user_index])
         print("All test length is " + str(len(records)))
         return records
 
 
 if __name__ == '__main__':
-    # gen_all_traj("data/Dataset Filtered", "jinchengFilteredTraj.csv")
+    # gen_all_traj("data/Dataset Filtered 2", "jinchengFilteredTraj.csv")
 
-    # df = pd.read_hdf(os.path.join('data/Dataset Filtered h5', "all_traj" + ".h5"), key='data')
-    # constructdataset = ConstructDataSet(data_df=df, n_pred=5)
+    # df = pd.read_hdf(os.path.join('data/Dataset Filtered 2 h5', "all_traj" + ".h5"), key='data')
+    # constructdataset = ConstructDataSet(data_df=df, n_pred=24)
     # constructdataset.store_train_data()
     # constructdataset.gen_train_test_data_1()
 
-    train_df = pd.read_hdf(os.path.join('data/Dataset Filtered h5', "train_traj" + ".h5"), key='data')
-    test_df = pd.read_hdf(os.path.join('data/Dataset Filtered h5', "test_traj" + ".h5"), key='data')
+    train_df = pd.read_hdf(os.path.join('data/Dataset Filtered 2 h5', "train_traj_24" + ".h5"), key='data')
+    test_df = pd.read_hdf(os.path.join('data/Dataset Filtered 2 h5', "test_traj_24" + ".h5"), key='data')
     dataset = DataSet(train_df, test_df)
-    train_data = dataset.gen_train_data()
-    test_data = dataset.gen_test_data()
+    # train_data = dataset.gen_train_data()
+    # test_data = dataset.gen_test_data()
     pass

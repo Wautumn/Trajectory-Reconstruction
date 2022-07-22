@@ -62,8 +62,6 @@ elif embed_index == 3:
     embed_file = 'embedding_graph_poi_glove.npy'
 elif embed_index == 4:
     embed_file = 'embedding_poi_glove.npy'
-elif embed_index == 4:
-    embed_file = 'embedding_poi_glove.npy'
 
 elif embed_index == 5:
     embed_file = 'embedding_graph_dynamic_poi_64.npy'
