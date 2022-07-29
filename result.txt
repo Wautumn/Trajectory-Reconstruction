@@ -1835,3 +1835,14 @@ test top30 score =0.024716
 test top50 score =0.049212
 test top100 score =0.104410
 test MAP score =0.005788
+epoch: 0 
+loss: 8.059389pth_embed/dataset-batch256-epoch101-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220729_epoch0.pth
+test accuracy score =0.035355
+fuzzzy score =0.092487
+test top3 score =0.056418
+test top5 score =0.068519
+test top10 score =0.090731
+test top30 score =0.149005
+test top50 score =0.189040
+test top100 score =0.268113
+test MAP score =0.055401
