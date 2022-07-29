@@ -1,11 +1,15 @@
-import os
-from attr import validate
-import torch
-from torch import nn
-import torch.nn.functional as F
-from torch.utils.data import DataLoader, random_split
-import pytorch_lightning as pl
+# encoding=utf-8
+#%% 
 
+import os
+os.environ['CUDA_VISIBLE_DEVICES']='1'
+
+import torch
+import numpy as np
+
+# %%
+
+#%%
 import argparse
 import datetime
 import os
@@ -22,13 +26,11 @@ from preprocess import DataSet
 from utils import next_batch, get_evalution, make_exchange_matrix, Loss_Function
 
 import config as gl
-
-# --device 1 --bs 256 --epoch 50 --loss loss --dataset 5
 parser = argparse.ArgumentParser()
 parser.add_argument('--device', default=0, type=int, help='train device')
 parser.add_argument('--bs', default=256, type=int, help='batch size')
-parser.add_argument('--epoch', default=101, type=int, help='epoch size')
-parser.add_argument('--loss', default='loss', type=str, help='loss fun')
+parser.add_argument('--epoch', default=100, type=int, help='epoch size')
+parser.add_argument('--loss', default='spatial_loss', type=str, help='loss fun')
 parser.add_argument('--dataset', default='5', type=str, help='dataset')
 parser.add_argument('--embed', default='11', type=str, help='cell id embed')
 
@@ -36,17 +38,11 @@ parser.add_argument('--d_model', default=1024, type=int, help='embed size')
 parser.add_argument('--head', default=2, type=int, help='multi head num')
 parser.add_argument('--layer', default=2, type=int, help='layer')
 
+args = parser.parse_args("""--device 0 --bs 256 --epoch 1 --loss los --dataset 5 --embed 11 --d_model 1024 --head 2 --layer 2""".split(' '))
 
-args = parser.parse_args()
-# args = parser.parse_args("""--device 1 --bs 256 --epoch 1 --loss los --dataset 5 --embed 9 --d_model 768 --head 2 --layer 2""".split(' '))
 
-# device = 'cuda:1'
-# batch_size = 256
-# epoch_size = 50
-# max_pred = 5  # max tokens of prediction
-# loss_fun = "loss"  # loss and spatial_loss
-
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+# %%
+device = 'cuda:%s' % args.device
 batch_size = args.bs
 epoch_size = args.epoch
 loss_fun = args.loss  # loss and spatial_loss
@@ -93,13 +89,12 @@ else:
     embed_file = "error"
 embed_npy = np.load(embed_path + embed_file)
 embed_size = embed_npy.shape[1]
-
-gl.set_value('pre_em_size',embed_size)
+gl.set_value('pre_em_size', embed_size)
 embed_size = embed_npy.shape[1]
 print("embed_file:%s, embed_size: %d" %(embed_file,embed_size))
 
 
-
+# %%
 max_pred = 5  # max tokens of prediction
 train_df = pd.read_hdf(os.path.join('/home/yj/traj/AttnMove/data/dataset2_o/', train_dataset))
 test_df = pd.read_hdf(os.path.join('/home/yj/traj/AttnMove/data/dataset2_o/', test_dataset))
@@ -129,7 +124,7 @@ for i, w in enumerate(train_word_list_int):
 
 idx2word = {i: w for i, w in enumerate(word2idx)}
 idx2embed = {i: word2embed[w] for i, w in enumerate(word2idx)}
-idx2embed = torch.from_numpy(np.array(list(idx2embed.values())).astype(float)).cuda()
+idx2embed = torch.from_numpy(np.array(list(idx2embed.values())).astype(float))
 vocab_size = len(word2idx) + 2
 
 train_token_list = list()
@@ -209,6 +204,7 @@ print("total length of test data is", str(len(test_total_data)))
 test_input_ids, test_masked_tokens, test_masked_pos, test_user_ids, test_day_ids = zip(*test_total_data)
 
 
+# %%
 class MyDataSet(Data.Dataset):
     def __init__(self, input_ids, masked_tokens, masked_pos, user_ids, day_ids):
         self.input_ids = input_ids
@@ -223,19 +219,23 @@ class MyDataSet(Data.Dataset):
     def __getitem__(self, idx):
         return self.input_ids[idx], self.masked_tokens[idx], self.masked_pos[idx], self.user_ids[idx], self.day_ids[idx]
 
-test_input_ids, test_masked_tokens, test_masked_pos, test_user_ids, test_day_ids = zip(*test_total_data)
-test_user_ids, test_day_ids = torch.LongTensor(test_user_ids).to(device), torch.LongTensor(test_day_ids).to(device)
-test_input_ids, test_masked_tokens, test_masked_pos, = torch.LongTensor(test_input_ids).to(device), \
-                                        torch.LongTensor(test_masked_tokens).to(device), \
-                                        torch.LongTensor(test_masked_pos).to(device)
+
+loader = Data.DataLoader(MyDataSet(input_ids, masked_tokens, masked_pos, user_ids, day_ids), batch_size, True)
+from downstream.bert_embed2 import BERT
+
+#%%
+model = BERT(vocab_size=vocab_size, id2embed=idx2embed).to(device)
+
+# %%
+state_dict =torch.load("pth_embed_cross_0725/dataset-batch256-epoch500-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220726_epoch90.pth")
+# state_dict = torch.load("pth_embed_stal_fulltrain/dataset-batch256-epoch100-spatial_loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220726_epoch50.pth")
+state_dict = torch.load("pth_embed_stal_em_5day/dataset-batch256-epoch100-spatial_loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch80.pth")
+
+# %%
+model.load_state_dict(state_dict=state_dict['model'])
 
 
-train_loader = Data.DataLoader(MyDataSet(input_ids, masked_tokens, masked_pos, user_ids, day_ids), batch_size, True)
-
-test_loader = Data.DataLoader(MyDataSet(test_input_ids, test_masked_tokens, test_masked_pos, test_user_ids, test_day_ids), batch_size, True)
-
-from downstream.model import Model
-
+#%%
 def map_score(ground_truth_list, logits_lm):
     MAP = 0
 
@@ -251,9 +251,7 @@ def map_score(ground_truth_list, logits_lm):
                 rank = np.argwhere(ground_truth[i]==pred_topk[i]) +1
                 MAP += 1.0/rank[0][0]
     return MAP
-
-def test(test_token_list, test_masked_tokens, test_masked_pos, test_user_ids, test_day_ids, tmodel):
-    model.train()
+def test(test_token_list, test_masked_tokens, test_masked_pos, test_user_ids, test_day_ids):
     masked_tokens = np.array(test_masked_tokens).reshape(-1)
     a = list(zip(test_masked_tokens, test_token_list, test_masked_pos, test_user_ids, test_day_ids))
     predict_prob = torch.Tensor([]).to(device)
@@ -261,66 +259,18 @@ def test(test_token_list, test_masked_tokens, test_masked_pos, test_user_ids, te
     for batch in next_batch(a, batch_size=64):
         # Value filled with num_loc stands for masked tokens that shouldn't be considered.
         batch_masked_tokens, batch_token_list, batch_masked_pos, batch_user_ids, batch_day_ids = zip(*batch)
-        logits_lm = tmodel(torch.LongTensor(batch_token_list).to(device),
+        logits_lm = model(torch.LongTensor(batch_token_list).to(device),
                           torch.LongTensor(batch_masked_pos).to(device),
                           torch.LongTensor(batch_user_ids).to(device),
-                          torch.LongTensor(batch_day_ids).to(device) )
+                          torch.LongTensor(batch_day_ids).to(device), )
         logits_lm = torch.topk(logits_lm, 100, dim=2)[1]
         predict_prob = torch.cat([predict_prob, logits_lm], dim=0)
         MAP+= map_score(batch_masked_tokens, logits_lm=logits_lm)
     MAP=MAP/len(test_total_data)/5
-    
+    print(MAP)
 
-    accuracy_score, fuzzzy_score, top3_score, top5_score, top10_score, top30_score, top50_score, top100_score = get_evalution(
-        ground_truth=masked_tokens, logits_lm=predict_prob, exchange_matrix=exchange_map)
-    print('test accuracy score =', '{:.6f}'.format(accuracy_score))
-    print('fuzzzy score =', '{:.6f}'.format(fuzzzy_score))
-    print('test top3 score =', '{:.6f}'.format(top3_score))
-    print('test top5 score =', '{:.6f}'.format(top5_score))
-    print('test top10 score =', '{:.6f}'.format(top10_score))
-    print('test top30 score =', '{:.6f}'.format(top30_score))
-    print('test top50 score =', '{:.6f}'.format(top50_score))
-    print('test top100 score =', '{:.6f}'.format(top100_score))
-    print('test top100 score =', '{:.6f}'.format(MAP))
+    # accuracy_score, fuzzzy_score, top3_score, top5_score, top10_score, top30_score, top50_score, top100_score = get_evalution(
+    #     ground_truth=masked_tokens, logits_lm=predict_prob, exchange_matrix=exchange_map)
+test(test_input_ids, test_masked_tokens, test_masked_pos, test_user_ids, test_day_ids)
 
-    return 'test accuracy score =' + '{:.6f}'.format(accuracy_score) + '\n' + \
-        'fuzzzy score =' +  '{:.6f}'.format(fuzzzy_score) + '\n'\
-            + 'test top3 score ='+ '{:.6f}'.format(top3_score) + '\n'\
-            + 'test top5 score ='+ '{:.6f}'.format(top5_score) + '\n'\
-            + 'test top10 score ='+ '{:.6f}'.format(top10_score) + '\n'\
-            + 'test top30 score ='+ '{:.6f}'.format(top30_score) + '\n'\
-            + 'test top50 score ='+ '{:.6f}'.format(top50_score) + '\n'\
-            + 'test top100 score ='+ '{:.6f}'.format(top100_score) + '\n' \
-            + 'test MAP score ='+ '{:.6f}'.format(MAP) + '\n'
-
-from pytorch_lightning.callbacks.early_stopping import EarlyStopping
-from pytorch_lightning.callbacks import ModelCheckpoint
-
-
-if __name__ == '__main__':
-
-    model = Model(vocab_size=vocab_size,id2embed=idx2embed)
-
-    
-    # most basic trainer, uses good defaults (auto-tensorboard, checkpoints, logs, and more)
-    # trainer = pl.Trainer(accelerator="gpu", devices=8) (if you have GPUs)
-    checkpoint_callback = ModelCheckpoint(dirpath='./checkpoints/',monitor="val_loss",save_top_k=5,mode="min")
-    trainer = pl.Trainer(   accelerator="gpu", devices=[0,1], max_epochs=500,check_val_every_n_epoch=2,
-                callbacks=[EarlyStopping(monitor="val_loss", mode="min",patience=2),checkpoint_callback])
-    # trainer.fit(model=model, train_dataloaders=train_loader,val_dataloaders=test_loader)
-    #                 )
-    # model.load_from_checkpoint(checkpoint_path=checkpoint_callback.best_model_path)
-    model.load_from_checkpoint(checkpoint_path="./checkpoints/epoch=203-step=67524.ckpt",vocab_size=vocab_size,id2embed=idx2embed)
-    test_total_data = make_test_data(test_data)
-    test_input_ids, test_masked_tokens, test_masked_pos, test_user_ids, test_day_ids = zip(*test_total_data)
-    
-
-    f = open('result.txt','a+')
-    f.write("epoch: %d \n" %1)
-    result = test(test_input_ids, test_masked_tokens, test_masked_pos, test_user_ids, test_day_ids, model.model.cuda())
-    f.write(result)
-    f.close()
-
-
-
-
+# %%

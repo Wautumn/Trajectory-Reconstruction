@@ -22,8 +22,8 @@ os.environ['CUDA_VISIBLE_DEVICES']='1'
 parser = argparse.ArgumentParser()
 parser.add_argument('--device', default=0, type=int, help='train device')
 parser.add_argument('--bs', default=256, type=int, help='batch size')
-parser.add_argument('--epoch', default=100, type=int, help='epoch size')
-parser.add_argument('--loss', default='spatial_loss', type=str, help='loss fun')
+parser.add_argument('--epoch', default=101, type=int, help='epoch size')
+parser.add_argument('--loss', default='loss', type=str, help='loss fun')
 parser.add_argument('--dataset', default='5', type=str, help='dataset')
 parser.add_argument('--embed', default='11', type=str, help='cell id embed')
 
@@ -231,21 +231,39 @@ optimizer = optim.Adadelta(model.parameters(), lr=0.001)
 train_predict = []
 train_truth = []
 
+def map_score(ground_truth_list, logits_lm):
+    MAP = 0
+
+    # pred_topk = torch.flatten(logits_lm,start_dim=0,end_dim=1).cpu().data.numpy()
+    logits_lm = logits_lm.cpu().data.numpy()
+    MAP=0
+    for j in range(len(ground_truth_list)):    
+        ground_truth = ground_truth_list[j]
+        pred_topk = logits_lm[j]
+
+        for i in range(len(ground_truth)):
+            if ground_truth[i] in pred_topk[i]:
+                rank = np.argwhere(ground_truth[i]==pred_topk[i]) +1
+                MAP += 1.0/rank[0][0]
+    return MAP
 
 def test(test_token_list, test_masked_tokens, test_masked_pos, test_user_ids, test_day_ids):
     masked_tokens = np.array(test_masked_tokens).reshape(-1)
-    a = list(zip(test_token_list, test_masked_pos, test_user_ids, test_day_ids))
+    a = list(zip(test_masked_tokens, test_token_list, test_masked_pos, test_user_ids, test_day_ids))
     predict_prob = torch.Tensor([]).to(device)
-
+    MAP=0
     for batch in next_batch(a, batch_size=64):
         # Value filled with num_loc stands for masked tokens that shouldn't be considered.
-        batch_token_list, batch_masked_pos, batch_user_ids, batch_day_ids = zip(*batch)
+        batch_masked_tokens, batch_token_list, batch_masked_pos, batch_user_ids, batch_day_ids = zip(*batch)
         logits_lm = model(torch.LongTensor(batch_token_list).to(device),
                           torch.LongTensor(batch_masked_pos).to(device),
                           torch.LongTensor(batch_user_ids).to(device),
                           torch.LongTensor(batch_day_ids).to(device), )
         logits_lm = torch.topk(logits_lm, 100, dim=2)[1]
         predict_prob = torch.cat([predict_prob, logits_lm], dim=0)
+        MAP+= map_score(batch_masked_tokens, logits_lm=logits_lm)
+    MAP=MAP/len(test_total_data)/5
+    
 
     accuracy_score, fuzzzy_score, top3_score, top5_score, top10_score, top30_score, top50_score, top100_score = get_evalution(
         ground_truth=masked_tokens, logits_lm=predict_prob, exchange_matrix=exchange_map)
@@ -257,6 +275,7 @@ def test(test_token_list, test_masked_tokens, test_masked_pos, test_user_ids, te
     print('test top30 score =', '{:.6f}'.format(top30_score))
     print('test top50 score =', '{:.6f}'.format(top50_score))
     print('test top100 score =', '{:.6f}'.format(top100_score))
+    print('test top100 score =', '{:.6f}'.format(MAP))
 
     return 'test accuracy score =' + '{:.6f}'.format(accuracy_score) + '\n' + \
         'fuzzzy score =' +  '{:.6f}'.format(fuzzzy_score) + '\n'\
@@ -265,7 +284,11 @@ def test(test_token_list, test_masked_tokens, test_masked_pos, test_user_ids, te
             + 'test top10 score ='+ '{:.6f}'.format(top10_score) + '\n'\
             + 'test top30 score ='+ '{:.6f}'.format(top30_score) + '\n'\
             + 'test top50 score ='+ '{:.6f}'.format(top50_score) + '\n'\
-            + 'test top100 score ='+ '{:.6f}'.format(top100_score) + '\n'
+            + 'test top100 score ='+ '{:.6f}'.format(top100_score) + '\n' \
+            + 'test MAP score ='+ '{:.6f}'.format(MAP) + '\n'
+
+# %%
+
 
 for epoch in range(epoch_size):
     train_predict, train_truth = [], []
@@ -287,7 +310,7 @@ for epoch in range(epoch_size):
         optimizer.step()
         # if i % 10 == 0:
         #     break
-    if epoch%10 ==0:
+    if epoch%5 ==0:
         torch.save({'model': model.state_dict()},
            'pth_embed/dataset-batch%s-epoch%s-%s-dmodel%s-head%s_layer%s_embed%s_%s_%s_epoch%d.pth' % (
                batch_size, epoch_size, loss_fun, d_model, head, layer, embed_index, embed_file.replace(".npy", ""),
@@ -298,7 +321,9 @@ for epoch in range(epoch_size):
         f.write('pth_embed/dataset-batch%s-epoch%s-%s-dmodel%s-head%s_layer%s_embed%s_%s_%s_epoch%d.pth\n' % (
                batch_size, epoch_size, loss_fun, d_model, head, layer, embed_index, embed_file.replace(".npy", ""),
                datetime.datetime.now().strftime("%Y%m%d"),epoch))
+        model.eval()
         result = test(test_input_ids, test_masked_tokens, test_masked_pos, test_user_ids, test_day_ids)
+        model.train()
         f.write(result)
         f.close()
 
@@ -314,5 +339,5 @@ torch.save({'model': model.state_dict()},
 
 
             
-
+model.eval()
 test(test_input_ids, test_masked_tokens, test_masked_pos, test_user_ids, test_day_ids)

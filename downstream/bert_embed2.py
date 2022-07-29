@@ -183,9 +183,12 @@ class BERT(nn.Module):
         self.fc2 = nn.Linear(d_model, vocab_size, bias=False)
         self.fc2.weight = embed_weight
 
-        print(id2embed.shape)
         self.linear1 = nn.Linear(d_model,d_model)
         self.linear2 = nn.Linear(id2embed.shape[1], d_model)
+
+        self.linear_prior = nn.Linear(id2embed.shape[1], d_model,False)
+        self.linear_next = nn.Linear(id2embed.shape[1], d_model,False)
+        self.poi_em_size = id2embed.shape[1]
 
     def forward(self, input_ids, masked_pos, user_ids=None, temp_ids=None):
         poi_embedding_tensor = self.poi_embedding(input_ids)
@@ -197,11 +200,12 @@ class BERT(nn.Module):
         # it will be decided by first token(CLS)
         # h_pooled = self.fc(output[:, 0])  # [batch_size, d_model]
         # logits_clsf = self.classifier(h_pooled)  # [batch_size, 2] predict isNext
-
-        output = self.linear1(output) + self.linear2(poi_embedding_tensor)
-
+        masked_pos_poi = masked_pos[:, :, None].expand(-1, -1, self.poi_em_size)  # [batch_size, max_pred, d_model]
         masked_pos = masked_pos[:, :, None].expand(-1, -1, d_model)  # [batch_size, max_pred, d_model]
+        
+        poi_prior = torch.gather(poi_embedding_tensor, 1, masked_pos_poi-1)
+        poi_next = torch.gather(poi_embedding_tensor, 1, masked_pos_poi+1)
         h_masked = torch.gather(output, 1, masked_pos)  # masking position [batch_size, max_pred, d_model]
-        h_masked = self.activ2(self.linear(h_masked))  # [batch_size, max_pred, d_model]
+        h_masked = self.activ2(self.linear(h_masked)+self.linear_prior(poi_prior)+ self.linear_next(poi_next))  # [batch_size, max_pred, d_model]
         logits_lm = self.fc2(h_masked)  # [batch_size, max_pred, vocab_size]
         return logits_lm

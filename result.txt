@@ -128,12 +128,1710 @@ test top100 score =0.959622
 
 # test 202207026
 # spatial entropyepoch: 0 
-loss: 8.643944pth_embed/dataset-batch256-epoch100-spatial_loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220726_epoch0.pth
-test accuracy score =0.292908
-fuzzzy score =0.442754
-test top3 score =0.368769
-test top5 score =0.399279
-test top10 score =0.441120
-test top30 score =0.513336
-test top50 score =0.550710
-test top100 score =0.607521
+pth_embed_stal_fulltrain
+
+
+epoch: 0 
+loss: 8.493274pth_embed/dataset-batch256-epoch100-spatial_loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220726_epoch0.pth
+test accuracy score =0.297781
+fuzzzy score =0.446286
+test top3 score =0.378794
+test top5 score =0.409468
+test top10 score =0.450296
+test top30 score =0.517182
+test top50 score =0.552394
+test top100 score =0.608983
+epoch: 10 
+loss: 5.425163pth_embed/dataset-batch256-epoch100-spatial_loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220726_epoch10.pth
+test accuracy score =0.582797
+fuzzzy score =0.727292
+test top3 score =0.693928
+test top5 score =0.728548
+test top10 score =0.770995
+test top30 score =0.830046
+test top50 score =0.855719
+test top100 score =0.889083
+epoch: 20 
+loss: 4.961190pth_embed/dataset-batch256-epoch100-spatial_loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220726_epoch20.pth
+test accuracy score =0.618580
+fuzzzy score =0.758452
+test top3 score =0.732130
+test top5 score =0.767271
+test top10 score =0.807706
+test top30 score =0.863482
+test top50 score =0.886643
+test top100 score =0.916497
+epoch: 30 
+loss: 4.859298pth_embed/dataset-batch256-epoch100-spatial_loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220726_epoch30.pth
+test accuracy score =0.632194
+fuzzzy score =0.769190
+test top3 score =0.748890
+test top5 score =0.783054
+test top10 score =0.823468
+test top30 score =0.877538
+test top50 score =0.899493
+test top100 score =0.929055
+epoch: 40 
+loss: 4.984096pth_embed/dataset-batch256-epoch100-spatial_loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220726_epoch40.pth
+test accuracy score =0.640771
+fuzzzy score =0.774199
+test top3 score =0.758195
+test top5 score =0.792872
+test top10 score =0.832529
+test top30 score =0.886250
+test top50 score =0.907563
+test top100 score =0.936268
+epoch: 50 
+loss: 4.842919pth_embed/dataset-batch256-epoch100-spatial_loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220726_epoch50.pth
+test accuracy score =0.645658
+fuzzzy score =0.776311
+test top3 score =0.763974
+test top5 score =0.799336
+test top10 score =0.839222
+test top30 score =0.892629
+test top50 score =0.914848
+test top100 score =0.942768
+epoch: 60 
+loss: 4.583833pth_embed/dataset-batch256-epoch100-spatial_loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220726_epoch60.pth
+test accuracy score =0.648384
+fuzzzy score =0.778323
+test top3 score =0.767592
+test top5 score =0.803603
+test top10 score =0.843411
+test top30 score =0.896868
+test top50 score =0.919179
+test top100 score =0.946422
+epoch: 70 
+loss: 4.468258pth_embed/dataset-batch256-epoch100-spatial_loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220726_epoch70.pth
+test accuracy score =0.649682
+fuzzzy score =0.778780
+test top3 score =0.770888
+test top5 score =0.806921
+test top10 score =0.846778
+test top30 score =0.900756
+test top50 score =0.922818
+test top100 score =0.950974
+epoch: 80 
+loss: 4.649131pth_embed/dataset-batch256-epoch100-spatial_loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch80.pth
+test accuracy score =0.650981
+fuzzzy score =0.778751
+test top3 score =0.772950
+test top5 score =0.809361
+test top10 score =0.849126
+test top30 score =0.903218
+test top50 score =0.925216
+test top100 score =0.952829
+epoch: 90 
+loss: 4.467717pth_embed/dataset-batch256-epoch100-spatial_loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch90.pth
+test accuracy score =0.651580
+fuzzzy score =0.779351
+test top3 score =0.774149
+test top5 score =0.810396
+test top10 score =0.850781
+test top30 score =0.904845
+test top50 score =0.927228
+test top100 score =0.954449
+
+
+#0726
+train day 5day
+ with stal+poi
+epoch: 0 
+loss: 8.859236pth_embed/dataset-batch256-epoch100-spatial_loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch0.pth
+test accuracy score =0.014549
+fuzzzy score =0.105123
+test top3 score =0.044331
+test top5 score =0.064131
+test top10 score =0.100293
+test top30 score =0.190824
+test top50 score =0.251894
+test top100 score =0.355319
+epoch: 10 
+loss: 5.245230pth_embed/dataset-batch256-epoch100-spatial_loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch10.pth
+test accuracy score =0.347999
+fuzzzy score =0.432943
+test top3 score =0.447356
+test top5 score =0.483967
+test top10 score =0.532101
+test top30 score =0.603325
+test top50 score =0.633999
+test top100 score =0.680043
+epoch: 20 
+loss: 3.842802pth_embed/dataset-batch256-epoch100-spatial_loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch20.pth
+test accuracy score =0.406714
+fuzzzy score =0.485922
+test top3 score =0.510332
+test top5 score =0.547378
+test top10 score =0.593186
+test top30 score =0.655933
+test top50 score =0.684338
+test top100 score =0.725458
+epoch: 30 
+loss: 4.125078pth_embed/dataset-batch256-epoch100-spatial_loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch30.pth
+test accuracy score =0.445173
+fuzzzy score =0.522298
+test top3 score =0.543296
+test top5 score =0.578081
+test top10 score =0.620542
+test top30 score =0.684495
+test top50 score =0.713914
+test top100 score =0.756361
+epoch: 40 
+loss: 2.429443pth_embed/dataset-batch256-epoch100-spatial_loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch40.pth
+test accuracy score =0.464688
+fuzzzy score =0.544338
+test top3 score =0.565615
+test top5 score =0.601349
+test top10 score =0.644538
+test top30 score =0.705694
+test top50 score =0.734484
+test top100 score =0.775326
+epoch: 50 
+loss: 3.129414pth_embed/dataset-batch256-epoch100-spatial_loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch50.pth
+test accuracy score =0.471523
+fuzzzy score =0.552494
+test top3 score =0.573386
+test top5 score =0.610004
+test top10 score =0.652579
+test top30 score =0.713842
+test top50 score =0.742098
+test top100 score =0.783011
+epoch: 60 
+loss: 3.953168pth_embed/dataset-batch256-epoch100-spatial_loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch60.pth
+test accuracy score =0.476968
+fuzzzy score =0.562226
+test top3 score =0.581242
+test top5 score =0.617995
+test top10 score =0.661748
+test top30 score =0.722476
+test top50 score =0.750039
+test top100 score =0.789861
+epoch: 70 
+loss: 3.730358pth_embed/dataset-batch256-epoch100-spatial_loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch70.pth
+test accuracy score =0.486657
+fuzzzy score =0.566857
+test top3 score =0.587299
+test top5 score =0.622961
+test top10 score =0.664852
+test top30 score =0.725066
+test top50 score =0.751902
+test top100 score =0.790232
+epoch: 80 
+loss: 2.384883pth_embed/dataset-batch256-epoch100-spatial_loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch80.pth
+test accuracy score =0.494691
+fuzzzy score =0.573043
+test top3 score =0.596118
+test top5 score =0.631666
+test top10 score =0.673721
+test top30 score =0.733029
+test top50 score =0.760499
+test top100 score =0.797553
+epoch: 90 
+loss: 3.267289pth_embed/dataset-batch256-epoch100-spatial_loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch90.pth
+test accuracy score =0.492394
+fuzzzy score =0.573528
+test top3 score =0.595284
+test top5 score =0.631231
+test top10 score =0.672351
+test top30 score =0.729740
+test top50 score =0.757110
+test top100 score =0.794977
+
+
+#0726
+train day 5day
+with poi
+
+epoch: 0 
+loss: 6.324237pth_embed/dataset-batch256-epoch101-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch0.pth
+epoch: 0 
+loss: 6.545937pth_embed/dataset-batch256-epoch101-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch0.pth
+test accuracy score =0.031595
+fuzzzy score =0.070318
+test top3 score =0.058930
+test top5 score =0.077132
+test top10 score =0.113414
+test top30 score =0.196839
+test top50 score =0.253043
+test top100 score =0.347806
+test MAP score =0.059673
+epoch: 10 
+loss: 3.345234pth_embed/dataset-batch256-epoch101-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch10.pth
+test accuracy score =0.383525
+fuzzzy score =0.436910
+test top3 score =0.484581
+test top5 score =0.513835
+test top10 score =0.548555
+test top30 score =0.606315
+test top50 score =0.636775
+test top100 score =0.683496
+test MAP score =0.445697
+epoch: 20 
+loss: 2.006043pth_embed/dataset-batch256-epoch101-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch20.pth
+test accuracy score =0.421106
+fuzzzy score =0.477253
+test top3 score =0.525901
+test top5 score =0.557724
+test top10 score =0.595719
+test top30 score =0.655241
+test top50 score =0.685187
+test top100 score =0.730103
+test MAP score =0.485705
+epoch: 30 
+loss: 3.041430pth_embed/dataset-batch256-epoch101-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch30.pth
+test accuracy score =0.458494
+fuzzzy score =0.513336
+test top3 score =0.555476
+test top5 score =0.586022
+test top10 score =0.623932
+test top30 score =0.680385
+test top50 score =0.709276
+test top100 score =0.753785
+test MAP score =0.519092
+epoch: 40 
+loss: 2.171030pth_embed/dataset-batch256-epoch101-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch40.pth
+test accuracy score =0.476054
+fuzzzy score =0.533443
+test top3 score =0.572686
+test top5 score =0.602947
+test top10 score =0.638437
+test top30 score =0.696625
+test top50 score =0.725922
+test top100 score =0.767720
+test MAP score =0.535941
+epoch: 50 
+loss: 1.358084pth_embed/dataset-batch256-epoch101-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch50.pth
+test accuracy score =0.483304
+fuzzzy score =0.541969
+test top3 score =0.579372
+test top5 score =0.609825
+test top10 score =0.645844
+test top30 score =0.704281
+test top50 score =0.733150
+test top100 score =0.774870
+test MAP score =0.543093
+epoch: 60 
+loss: 1.868106pth_embed/dataset-batch256-epoch101-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch60.pth
+test accuracy score =0.488484
+fuzzzy score =0.547071
+test top3 score =0.583439
+test top5 score =0.614064
+test top10 score =0.651195
+test top30 score =0.711324
+test top50 score =0.739893
+test top100 score =0.779943
+test MAP score =0.548061
+epoch: 70 
+loss: 1.652230pth_embed/dataset-batch256-epoch101-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch70.pth
+test accuracy score =0.493271
+fuzzzy score =0.550974
+test top3 score =0.587806
+test top5 score =0.617574
+test top10 score =0.654841
+test top30 score =0.711531
+test top50 score =0.740086
+test top100 score =0.781391
+test MAP score =0.552277
+epoch: 80 
+loss: 1.491791pth_embed/dataset-batch256-epoch101-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch80.pth
+test accuracy score =0.496861
+fuzzzy score =0.555954
+test top3 score =0.593100
+test top5 score =0.624074
+test top10 score =0.660314
+test top30 score =0.719422
+test top50 score =0.747406
+test top100 score =0.787977
+test MAP score =0.556991
+epoch: 90 
+loss: 1.777721pth_embed/dataset-batch256-epoch101-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch90.pth
+test accuracy score =0.502269
+fuzzzy score =0.559279
+test top3 score =0.599279
+test top5 score =0.628741
+test top10 score =0.665309
+test top30 score =0.722026
+test top50 score =0.749690
+test top100 score =0.788170
+test MAP score =0.562261
+epoch: 100 
+loss: 1.748171pth_embed/dataset-batch256-epoch101-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch100.pth
+test accuracy score =0.502526
+fuzzzy score =0.560685
+test top3 score =0.599415
+test top5 score =0.628469
+test top10 score =0.665801
+test top30 score =0.723767
+test top50 score =0.752701
+test top100 score =0.791252
+test MAP score =0.562521
+epoch: 0 
+loss: 5.973318pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch0.pth
+test accuracy score =0.023767
+fuzzzy score =0.050446
+test top3 score =0.052879
+test top5 score =0.073721
+test top10 score =0.111852
+test top30 score =0.192658
+test top50 score =0.246736
+test top100 score =0.350417
+test MAP score =0.053093
+epoch: 5 
+loss: 3.046991pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch5.pth
+test accuracy score =0.332900
+fuzzzy score =0.384895
+test top3 score =0.408983
+test top5 score =0.434192
+test top10 score =0.467620
+test top30 score =0.527135
+test top50 score =0.559365
+test top100 score =0.613236
+test MAP score =0.382552
+epoch: 10 
+loss: 2.418522pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch10.pth
+test accuracy score =0.381898
+fuzzzy score =0.435241
+test top3 score =0.482697
+test top5 score =0.510182
+test top10 score =0.545615
+test top30 score =0.605694
+test top50 score =0.638016
+test top100 score =0.687827
+test MAP score =0.443889
+epoch: 15 
+loss: 2.910028pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch15.pth
+test accuracy score =0.404410
+fuzzzy score =0.459772
+test top3 score =0.508170
+test top5 score =0.539394
+test top10 score =0.578309
+test top30 score =0.641934
+test top50 score =0.673478
+test top100 score =0.719743
+test MAP score =0.468996
+epoch: 20 
+loss: 2.523176pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch20.pth
+test accuracy score =0.429169
+fuzzzy score =0.483339
+test top3 score =0.532137
+test top5 score =0.564096
+test top10 score =0.602276
+test top30 score =0.662647
+test top50 score =0.692273
+test top100 score =0.736960
+test MAP score =0.493195
+epoch: 25 
+loss: 2.535415pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch25.pth
+test accuracy score =0.446315
+fuzzzy score =0.502298
+test top3 score =0.545972
+test top5 score =0.577874
+test top10 score =0.617367
+test top30 score =0.678309
+test top50 score =0.707806
+test top100 score =0.751145
+test MAP score =0.508804
+epoch: 30 
+loss: 1.975638pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch30.pth
+test accuracy score =0.462918
+fuzzzy score =0.517702
+test top3 score =0.560963
+test top5 score =0.591381
+test top10 score =0.629040
+test top30 score =0.687977
+test top50 score =0.717139
+test top100 score =0.759137
+test MAP score =0.524017
+epoch: 35 
+loss: 1.963215pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch35.pth
+test accuracy score =0.468898
+fuzzzy score =0.525059
+test top3 score =0.566222
+test top5 score =0.596775
+test top10 score =0.636040
+test top30 score =0.695740
+test top50 score =0.725144
+test top100 score =0.765630
+test MAP score =0.529916
+epoch: 40 
+loss: 2.879484pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch40.pth
+test accuracy score =0.480143
+fuzzzy score =0.536525
+test top3 score =0.577167
+test top5 score =0.606700
+test top10 score =0.644317
+test top30 score =0.701712
+test top50 score =0.730203
+test top100 score =0.770260
+test MAP score =0.540301
+epoch: 45 
+loss: 2.556222pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch45.pth
+test accuracy score =0.481684
+fuzzzy score =0.540628
+test top3 score =0.578630
+test top5 score =0.609897
+test top10 score =0.649254
+test top30 score =0.707100
+test top50 score =0.734185
+test top100 score =0.772401
+test MAP score =0.542295
+epoch: 50 
+loss: 1.845831pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch50.pth
+test accuracy score =0.485915
+fuzzzy score =0.541984
+test top3 score =0.582198
+test top5 score =0.613022
+test top10 score =0.651060
+test top30 score =0.710111
+test top50 score =0.737481
+test top100 score =0.777167
+test MAP score =0.546237
+epoch: 55 
+loss: 2.040434pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch55.pth
+test accuracy score =0.489904
+fuzzzy score =0.544274
+test top3 score =0.587028
+test top5 score =0.618445
+test top10 score =0.656397
+test top30 score =0.713857
+test top50 score =0.740293
+test top100 score =0.779843
+test MAP score =0.550661
+epoch: 60 
+loss: 0.907063pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch60.pth
+test accuracy score =0.492858
+fuzzzy score =0.550446
+test top3 score =0.590182
+test top5 score =0.622212
+test top10 score =0.660307
+test top30 score =0.718202
+test top50 score =0.745002
+test top100 score =0.781934
+test MAP score =0.553688
+epoch: 65 
+loss: 1.411346pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch65.pth
+test accuracy score =0.494592
+fuzzzy score =0.550703
+test top3 score =0.592694
+test top5 score =0.623132
+test top10 score =0.661456
+test top30 score =0.719172
+test top50 score =0.745437
+test top100 score =0.783304
+test MAP score =0.555458
+epoch: 70 
+loss: 2.237024pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch70.pth
+test accuracy score =0.495291
+fuzzzy score =0.551887
+test top3 score =0.594263
+test top5 score =0.625387
+test top10 score =0.664395
+test top30 score =0.722704
+test top50 score =0.749219
+test top100 score =0.785722
+test MAP score =0.556810
+epoch: 75 
+loss: 2.576879pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch75.pth
+test accuracy score =0.495605
+fuzzzy score =0.554242
+test top3 score =0.594520
+test top5 score =0.625473
+test top10 score =0.663354
+test top30 score =0.721748
+test top50 score =0.748798
+test top100 score =0.783917
+test MAP score =0.557077
+epoch: 80 
+loss: 1.305860pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch80.pth
+test accuracy score =0.499222
+fuzzzy score =0.555312
+test top3 score =0.598423
+test top5 score =0.629411
+test top10 score =0.668405
+test top30 score =0.726243
+test top50 score =0.752694
+test top100 score =0.788905
+test MAP score =0.560893
+epoch: 85 
+loss: 1.892544pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch85.pth
+test accuracy score =0.496290
+fuzzzy score =0.554620
+test top3 score =0.593164
+test top5 score =0.623932
+test top10 score =0.662790
+test top30 score =0.722276
+test top50 score =0.750068
+test top100 score =0.786679
+test MAP score =0.556827
+epoch: 90 
+loss: 1.826004pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch90.pth
+test accuracy score =0.499936
+fuzzzy score =0.558202
+test top3 score =0.597417
+test top5 score =0.628855
+test top10 score =0.666985
+test top30 score =0.726208
+test top50 score =0.752529
+test top100 score =0.789711
+test MAP score =0.560888
+epoch: 95 
+loss: 1.694604pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch95.pth
+test accuracy score =0.499693
+fuzzzy score =0.559272
+test top3 score =0.597060
+test top5 score =0.628234
+test top10 score =0.666607
+test top30 score =0.723974
+test top50 score =0.749618
+test top100 score =0.787142
+test MAP score =0.560375
+epoch: 100 
+loss: 1.918530pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch100.pth
+test accuracy score =0.500207
+fuzzzy score =0.559215
+test top3 score =0.598466
+test top5 score =0.630210
+test top10 score =0.668156
+test top30 score =0.726978
+test top50 score =0.754192
+test top100 score =0.792701
+test MAP score =0.561653
+epoch: 105 
+loss: 1.912822pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch105.pth
+test accuracy score =0.500114
+fuzzzy score =0.556511
+test top3 score =0.597667
+test top5 score =0.628733
+test top10 score =0.668127
+test top30 score =0.728084
+test top50 score =0.754192
+test top100 score =0.791659
+test MAP score =0.561167
+epoch: 110 
+loss: 0.991812pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch110.pth
+test accuracy score =0.500057
+fuzzzy score =0.560385
+test top3 score =0.598159
+test top5 score =0.629797
+test top10 score =0.667635
+test top30 score =0.727406
+test top50 score =0.754228
+test top100 score =0.791630
+test MAP score =0.561336
+epoch: 115 
+loss: 1.190127pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch115.pth
+test accuracy score =0.500599
+fuzzzy score =0.561120
+test top3 score =0.598309
+test top5 score =0.629768
+test top10 score =0.669904
+test top30 score =0.729304
+test top50 score =0.756604
+test top100 score =0.794513
+test MAP score =0.561946
+epoch: 120 
+loss: 0.943704pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch120.pth
+test accuracy score =0.504117
+fuzzzy score =0.563175
+test top3 score =0.603553
+test top5 score =0.634684
+test top10 score =0.672950
+test top30 score =0.730446
+test top50 score =0.757710
+test top100 score =0.795783
+test MAP score =0.565740
+epoch: 125 
+loss: 1.746180pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch125.pth
+test accuracy score =0.501976
+fuzzzy score =0.562069
+test top3 score =0.599600
+test top5 score =0.630482
+test top10 score =0.668184
+test top30 score =0.729033
+test top50 score =0.756825
+test top100 score =0.793999
+test MAP score =0.562934
+epoch: 130 
+loss: 1.381488pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch130.pth
+test accuracy score =0.501013
+fuzzzy score =0.561584
+test top3 score =0.597802
+test top5 score =0.628762
+test top10 score =0.667128
+test top30 score =0.726793
+test top50 score =0.754285
+test top100 score =0.792158
+test MAP score =0.561551
+epoch: 135 
+loss: 1.061629pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch135.pth
+test accuracy score =0.502483
+fuzzzy score =0.563111
+test top3 score =0.600735
+test top5 score =0.632030
+test top10 score =0.670253
+test top30 score =0.730103
+test top50 score =0.758566
+test top100 score =0.796147
+test MAP score =0.563883
+epoch: 140 
+loss: 1.586784pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch140.pth
+test accuracy score =0.497881
+fuzzzy score =0.560756
+test top3 score =0.594656
+test top5 score =0.626450
+test top10 score =0.665979
+test top30 score =0.726807
+test top50 score =0.754720
+test top100 score =0.793614
+test MAP score =0.558771
+epoch: 145 
+loss: 1.645794pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch145.pth
+test accuracy score =0.503996
+fuzzzy score =0.561220
+test top3 score =0.601555
+test top5 score =0.632387
+test top10 score =0.669861
+test top30 score =0.728248
+test top50 score =0.755961
+test top100 score =0.794092
+test MAP score =0.564844
+epoch: 150 
+loss: 1.286661pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch150.pth
+test accuracy score =0.501085
+fuzzzy score =0.559729
+test top3 score =0.598073
+test top5 score =0.629611
+test top10 score =0.666693
+test top30 score =0.723197
+test top50 score =0.750731
+test top100 score =0.788848
+test MAP score =0.561472
+epoch: 155 
+loss: 1.890728pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch155.pth
+test accuracy score =0.504367
+fuzzzy score =0.561406
+test top3 score =0.602169
+test top5 score =0.633179
+test top10 score =0.670210
+test top30 score =0.729390
+test top50 score =0.757431
+test top100 score =0.795305
+test MAP score =0.565313
+epoch: 160 
+loss: 0.989442pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch160.pth
+test accuracy score =0.502233
+fuzzzy score =0.559850
+test top3 score =0.597281
+test top5 score =0.628327
+test top10 score =0.665894
+test top30 score =0.722098
+test top50 score =0.750560
+test top100 score =0.789076
+test MAP score =0.561765
+epoch: 165 
+loss: 1.235177pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch165.pth
+test accuracy score =0.500664
+fuzzzy score =0.558644
+test top3 score =0.597745
+test top5 score =0.628198
+test top10 score =0.666407
+test top30 score =0.725765
+test top50 score =0.753493
+test top100 score =0.791431
+test MAP score =0.561303
+epoch: 170 
+loss: 1.341207pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch170.pth
+test accuracy score =0.501798
+fuzzzy score =0.561206
+test top3 score =0.598138
+test top5 score =0.629297
+test top10 score =0.666415
+test top30 score =0.723282
+test top50 score =0.750974
+test top100 score =0.789804
+test MAP score =0.561942
+epoch: 175 
+loss: 1.490364pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch175.pth
+test accuracy score =0.500036
+fuzzzy score =0.562811
+test top3 score =0.596261
+test top5 score =0.627620
+test top10 score =0.665594
+test top30 score =0.723924
+test top50 score =0.751802
+test top100 score =0.790881
+test MAP score =0.560328
+epoch: 180 
+loss: 1.109252pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch180.pth
+test accuracy score =0.494071
+fuzzzy score =0.555826
+test top3 score =0.594599
+test top5 score =0.627692
+test top10 score =0.666258
+test top30 score =0.726051
+test top50 score =0.754905
+test top100 score =0.793643
+test MAP score =0.556710
+epoch: 185 
+loss: 1.151699pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch185.pth
+test accuracy score =0.501434
+fuzzzy score =0.559558
+test top3 score =0.597959
+test top5 score =0.629889
+test top10 score =0.667342
+test top30 score =0.725644
+test top50 score =0.753714
+test top100 score =0.792715
+test MAP score =0.561976
+epoch: 190 
+loss: 0.635015pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch190.pth
+test accuracy score =0.500528
+fuzzzy score =0.561420
+test top3 score =0.596604
+test top5 score =0.627435
+test top10 score =0.665244
+test top30 score =0.722818
+test top50 score =0.750753
+test top100 score =0.790011
+test MAP score =0.560535
+epoch: 195 
+loss: 0.874351pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch195.pth
+test accuracy score =0.495134
+fuzzzy score =0.560606
+test top3 score =0.592572
+test top5 score =0.623803
+test top10 score =0.663111
+test top30 score =0.720428
+test top50 score =0.747078
+test top100 score =0.786493
+test MAP score =0.555949
+epoch: 200 
+loss: 1.597778pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch200.pth
+test accuracy score =0.497232
+fuzzzy score =0.555662
+test top3 score =0.595640
+test top5 score =0.627035
+test top10 score =0.664838
+test top30 score =0.721812
+test top50 score =0.749105
+test top100 score =0.788191
+test MAP score =0.558382
+epoch: 205 
+loss: 1.038448pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch205.pth
+test accuracy score =0.497167
+fuzzzy score =0.559458
+test top3 score =0.593364
+test top5 score =0.625237
+test top10 score =0.663796
+test top30 score =0.721577
+test top50 score =0.748213
+test top100 score =0.786486
+test MAP score =0.557582
+epoch: 210 
+loss: 1.823718pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch210.pth
+test accuracy score =0.502290
+fuzzzy score =0.561206
+test top3 score =0.598901
+test top5 score =0.629511
+test top10 score =0.667842
+test top30 score =0.725344
+test top50 score =0.751787
+test top100 score =0.789554
+test MAP score =0.562597
+epoch: 215 
+loss: 1.003646pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch215.pth
+test accuracy score =0.496975
+fuzzzy score =0.557381
+test top3 score =0.593557
+test top5 score =0.624838
+test top10 score =0.663354
+test top30 score =0.721605
+test top50 score =0.747513
+test top100 score =0.785223
+test MAP score =0.557422
+epoch: 220 
+loss: 0.911286pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220727_epoch220.pth
+test accuracy score =0.497003
+fuzzzy score =0.557959
+test top3 score =0.594913
+test top5 score =0.625437
+test top10 score =0.662640
+test top30 score =0.719707
+test top50 score =0.745637
+test top100 score =0.781927
+test MAP score =0.557699
+epoch: 225 
+loss: 1.183425pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch225.pth
+test accuracy score =0.495362
+fuzzzy score =0.555369
+test top3 score =0.592758
+test top5 score =0.624402
+test top10 score =0.662347
+test top30 score =0.719993
+test top50 score =0.744888
+test top100 score =0.779864
+test MAP score =0.555981
+epoch: 230 
+loss: 0.948525pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch230.pth
+test accuracy score =0.497795
+fuzzzy score =0.555854
+test top3 score =0.593514
+test top5 score =0.625087
+test top10 score =0.663182
+test top30 score =0.721762
+test top50 score =0.747128
+test top100 score =0.783204
+test MAP score =0.557855
+epoch: 235 
+loss: 1.529588pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch235.pth
+test accuracy score =0.493065
+fuzzzy score =0.552030
+test top3 score =0.590767
+test top5 score =0.622576
+test top10 score =0.661427
+test top30 score =0.719137
+test top50 score =0.745237
+test top100 score =0.782183
+test MAP score =0.554148
+epoch: 240 
+loss: 1.168200pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch240.pth
+test accuracy score =0.493000
+fuzzzy score =0.554206
+test top3 score =0.590474
+test top5 score =0.622469
+test top10 score =0.661577
+test top30 score =0.719493
+test top50 score =0.746422
+test top100 score =0.783032
+test MAP score =0.554132
+epoch: 245 
+loss: 0.717647pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch245.pth
+test accuracy score =0.490988
+fuzzzy score =0.554156
+test top3 score =0.587306
+test top5 score =0.619900
+test top10 score =0.659037
+test top30 score =0.717210
+test top50 score =0.742975
+test top100 score =0.778552
+test MAP score =0.551647
+epoch: 250 
+loss: 0.840267pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch250.pth
+test accuracy score =0.495255
+fuzzzy score =0.555883
+test top3 score =0.591916
+test top5 score =0.623596
+test top10 score =0.663867
+test top30 score =0.720592
+test top50 score =0.746022
+test top100 score =0.780749
+test MAP score =0.555886
+epoch: 255 
+loss: 0.895560pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch255.pth
+test accuracy score =0.492558
+fuzzzy score =0.552900
+test top3 score =0.590318
+test top5 score =0.621142
+test top10 score =0.659879
+test top30 score =0.715683
+test top50 score =0.741099
+test top100 score =0.775555
+test MAP score =0.553312
+epoch: 260 
+loss: 1.165508pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch260.pth
+test accuracy score =0.492544
+fuzzzy score =0.555348
+test top3 score =0.588769
+test top5 score =0.619986
+test top10 score =0.659215
+test top30 score =0.717610
+test top50 score =0.743168
+test top100 score =0.777660
+test MAP score =0.552704
+epoch: 265 
+loss: 1.120314pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch265.pth
+test accuracy score =0.487371
+fuzzzy score =0.552487
+test top3 score =0.586500
+test top5 score =0.619493
+test top10 score =0.659900
+test top30 score =0.717510
+test top50 score =0.743047
+test top100 score =0.778138
+test MAP score =0.549345
+epoch: 270 
+loss: 0.946954pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch270.pth
+test accuracy score =0.484866
+fuzzzy score =0.548890
+test top3 score =0.584973
+test top5 score =0.618359
+test top10 score =0.659179
+test top30 score =0.716611
+test top50 score =0.742462
+test top100 score =0.776575
+test MAP score =0.547362
+epoch: 275 
+loss: 1.075454pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch275.pth
+test accuracy score =0.491445
+fuzzzy score =0.553100
+test top3 score =0.588234
+test top5 score =0.619864
+test top10 score =0.658537
+test top30 score =0.715997
+test top50 score =0.740714
+test top100 score =0.776489
+test MAP score =0.551917
+epoch: 280 
+loss: 0.964432pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch280.pth
+test accuracy score =0.490125
+fuzzzy score =0.549504
+test top3 score =0.588270
+test top5 score =0.620328
+test top10 score =0.659415
+test top30 score =0.716761
+test top50 score =0.741819
+test top100 score =0.777096
+test MAP score =0.551327
+epoch: 285 
+loss: 0.673580pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch285.pth
+test accuracy score =0.489219
+fuzzzy score =0.552351
+test top3 score =0.588270
+test top5 score =0.620628
+test top10 score =0.660606
+test top30 score =0.717760
+test top50 score =0.742776
+test top100 score =0.777760
+test MAP score =0.550860
+epoch: 290 
+loss: 0.421003pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch290.pth
+test accuracy score =0.490567
+fuzzzy score =0.550974
+test top3 score =0.587806
+test top5 score =0.619943
+test top10 score =0.659436
+test top30 score =0.716504
+test top50 score =0.742240
+test top100 score =0.777474
+test MAP score =0.551492
+epoch: 295 
+loss: 0.944884pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch295.pth
+test accuracy score =0.483817
+fuzzzy score =0.548034
+test top3 score =0.582861
+test top5 score =0.615619
+test top10 score =0.655769
+test top30 score =0.714377
+test top50 score =0.739722
+test top100 score =0.773999
+test MAP score =0.545748
+epoch: 300 
+loss: 0.620126pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch300.pth
+test accuracy score =0.487364
+fuzzzy score =0.549055
+test top3 score =0.585430
+test top5 score =0.616803
+test top10 score =0.656325
+test top30 score =0.714035
+test top50 score =0.739001
+test top100 score =0.773050
+test MAP score =0.548439
+epoch: 305 
+loss: 0.702571pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch305.pth
+test accuracy score =0.486143
+fuzzzy score =0.547485
+test top3 score =0.583382
+test top5 score =0.615590
+test top10 score =0.655326
+test top30 score =0.712001
+test top50 score =0.736989
+test top100 score =0.771595
+test MAP score =0.546972
+epoch: 310 
+loss: 0.989330pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch310.pth
+test accuracy score =0.487542
+fuzzzy score =0.547428
+test top3 score =0.585230
+test top5 score =0.618009
+test top10 score =0.657025
+test top30 score =0.714256
+test top50 score =0.739336
+test top100 score =0.773143
+test MAP score =0.548588
+epoch: 315 
+loss: 1.022898pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch315.pth
+test accuracy score =0.485473
+fuzzzy score =0.547756
+test top3 score =0.583111
+test top5 score =0.615762
+test top10 score =0.655683
+test top30 score =0.712451
+test top50 score =0.737374
+test top100 score =0.771438
+test MAP score =0.546691
+epoch: 320 
+loss: 1.176080pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch320.pth
+test accuracy score =0.485844
+fuzzzy score =0.544281
+test top3 score =0.581927
+test top5 score =0.614235
+test top10 score =0.654021
+test top30 score =0.711388
+test top50 score =0.736711
+test top100 score =0.771951
+test MAP score =0.546329
+epoch: 325 
+loss: 0.570373pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch325.pth
+test accuracy score =0.482012
+fuzzzy score =0.544274
+test top3 score =0.580885
+test top5 score =0.613243
+test top10 score =0.653343
+test top30 score =0.711852
+test top50 score =0.736704
+test top100 score =0.771402
+test MAP score =0.543818
+epoch: 330 
+loss: 0.881667pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch330.pth
+test accuracy score =0.486093
+fuzzzy score =0.547535
+test top3 score =0.583211
+test top5 score =0.615526
+test top10 score =0.654392
+test top30 score =0.711316
+test top50 score =0.736532
+test top100 score =0.771566
+test MAP score =0.546975
+epoch: 335 
+loss: 0.618798pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch335.pth
+test accuracy score =0.479950
+fuzzzy score =0.546436
+test top3 score =0.579814
+test top5 score =0.611951
+test top10 score =0.652801
+test top30 score =0.711274
+test top50 score =0.736932
+test top100 score =0.772622
+test MAP score =0.542264
+epoch: 340 
+loss: 0.491127pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch340.pth
+test accuracy score =0.482426
+fuzzzy score =0.544852
+test top3 score =0.579379
+test top5 score =0.612194
+test top10 score =0.651816
+test top30 score =0.710439
+test top50 score =0.735448
+test top100 score =0.768605
+test MAP score =0.543288
+epoch: 345 
+loss: 0.930183pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch345.pth
+test accuracy score =0.478858
+fuzzzy score =0.540535
+test top3 score =0.575790
+test top5 score =0.608890
+test top10 score =0.650489
+test top30 score =0.708619
+test top50 score =0.734499
+test top100 score =0.769554
+test MAP score =0.540099
+epoch: 350 
+loss: 0.409599pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch350.pth
+test accuracy score =0.483575
+fuzzzy score =0.542397
+test top3 score =0.580621
+test top5 score =0.613107
+test top10 score =0.652651
+test top30 score =0.710746
+test top50 score =0.735476
+test top100 score =0.769483
+test MAP score =0.544473
+epoch: 355 
+loss: 0.939670pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch355.pth
+test accuracy score =0.478580
+fuzzzy score =0.540200
+test top3 score =0.577710
+test top5 score =0.610788
+test top10 score =0.650953
+test top30 score =0.709069
+test top50 score =0.733964
+test top100 score =0.768676
+test MAP score =0.540588
+epoch: 360 
+loss: 0.713199pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch360.pth
+test accuracy score =0.477453
+fuzzzy score =0.542276
+test top3 score =0.576361
+test top5 score =0.609540
+test top10 score =0.650196
+test top30 score =0.708762
+test top50 score =0.734442
+test top100 score =0.769112
+test MAP score =0.539522
+epoch: 365 
+loss: 0.698007pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch365.pth
+test accuracy score =0.477424
+fuzzzy score =0.540457
+test top3 score =0.574706
+test top5 score =0.607991
+test top10 score =0.648890
+test top30 score =0.707742
+test top50 score =0.733450
+test top100 score =0.767884
+test MAP score =0.538731
+epoch: 370 
+loss: 0.536059pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch370.pth
+test accuracy score =0.477581
+fuzzzy score =0.538516
+test top3 score =0.576076
+test top5 score =0.609262
+test top10 score =0.650289
+test top30 score =0.708812
+test top50 score =0.734342
+test top100 score =0.768177
+test MAP score =0.539429
+epoch: 375 
+loss: 0.413212pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch375.pth
+test accuracy score =0.478894
+fuzzzy score =0.540271
+test top3 score =0.575833
+test top5 score =0.608705
+test top10 score =0.648298
+test top30 score =0.705530
+test top50 score =0.730510
+test top100 score =0.764838
+test MAP score =0.539798
+epoch: 380 
+loss: 0.488849pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch380.pth
+test accuracy score =0.475070
+fuzzzy score =0.534356
+test top3 score =0.573493
+test top5 score =0.606907
+test top10 score =0.647164
+test top30 score =0.705073
+test top50 score =0.731131
+test top100 score =0.766293
+test MAP score =0.536970
+epoch: 385 
+loss: 0.436884pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch385.pth
+test accuracy score =0.473528
+fuzzzy score =0.535933
+test top3 score =0.572187
+test top5 score =0.605359
+test top10 score =0.645780
+test top30 score =0.705102
+test top50 score =0.731359
+test top100 score =0.766643
+test MAP score =0.535519
+epoch: 390 
+loss: 0.445903pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch390.pth
+test accuracy score =0.476910
+fuzzzy score =0.535483
+test top3 score =0.574121
+test top5 score =0.607349
+test top10 score =0.646800
+test top30 score =0.704245
+test top50 score =0.731074
+test top100 score =0.765451
+test MAP score =0.538076
+epoch: 395 
+loss: 0.797373pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch395.pth
+test accuracy score =0.472130
+fuzzzy score =0.535155
+test top3 score =0.572323
+test top5 score =0.605237
+test top10 score =0.647178
+test top30 score =0.705929
+test top50 score =0.731859
+test top100 score =0.765844
+test MAP score =0.534845
+epoch: 400 
+loss: 0.285101pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch400.pth
+test accuracy score =0.474220
+fuzzzy score =0.533471
+test top3 score =0.573550
+test top5 score =0.605808
+test top10 score =0.646386
+test top30 score =0.704360
+test top50 score =0.730482
+test top100 score =0.766051
+test MAP score =0.536285
+epoch: 405 
+loss: 0.554001pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch405.pth
+test accuracy score =0.472144
+fuzzzy score =0.536275
+test top3 score =0.571852
+test top5 score =0.605259
+test top10 score =0.646707
+test top30 score =0.704716
+test top50 score =0.730532
+test top100 score =0.765801
+test MAP score =0.534705
+epoch: 410 
+loss: 0.694511pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch410.pth
+test accuracy score =0.462026
+fuzzzy score =0.529076
+test top3 score =0.566365
+test top5 score =0.601434
+test top10 score =0.643175
+test top30 score =0.703418
+test top50 score =0.729504
+test top100 score =0.764360
+test MAP score =0.527386
+epoch: 415 
+loss: 0.839954pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch415.pth
+test accuracy score =0.470218
+fuzzzy score =0.535519
+test top3 score =0.570560
+test top5 score =0.604039
+test top10 score =0.645601
+test top30 score =0.704631
+test top50 score =0.731295
+test top100 score =0.766208
+test MAP score =0.533133
+epoch: 420 
+loss: 0.625732pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch420.pth
+test accuracy score =0.468248
+fuzzzy score =0.527356
+test top3 score =0.567556
+test top5 score =0.600785
+test top10 score =0.642226
+test top30 score =0.701555
+test top50 score =0.728291
+test top100 score =0.764203
+test MAP score =0.530730
+epoch: 425 
+loss: 0.498561pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch425.pth
+test accuracy score =0.471481
+fuzzzy score =0.531117
+test top3 score =0.569154
+test top5 score =0.602034
+test top10 score =0.642091
+test top30 score =0.699415
+test top50 score =0.725437
+test top100 score =0.760642
+test MAP score =0.532752
+epoch: 430 
+loss: 0.459834pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch430.pth
+test accuracy score =0.468056
+fuzzzy score =0.531802
+test top3 score =0.567356
+test top5 score =0.601170
+test top10 score =0.642940
+test top30 score =0.702868
+test top50 score =0.728876
+test top100 score =0.764602
+test MAP score =0.530645
+epoch: 435 
+loss: 0.200514pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch435.pth
+test accuracy score =0.473678
+fuzzzy score =0.536454
+test top3 score =0.571302
+test top5 score =0.603725
+test top10 score =0.644231
+test top30 score =0.702183
+test top50 score =0.728277
+test top100 score =0.763682
+test MAP score =0.534998
+epoch: 440 
+loss: 0.513283pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch440.pth
+test accuracy score =0.464731
+fuzzzy score =0.526450
+test top3 score =0.565066
+test top5 score =0.599130
+test top10 score =0.641127
+test top30 score =0.700992
+test top50 score =0.727570
+test top100 score =0.762611
+test MAP score =0.527942
+epoch: 445 
+loss: 0.499573pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch445.pth
+test accuracy score =0.471966
+fuzzzy score =0.531887
+test top3 score =0.571852
+test top5 score =0.604481
+test top10 score =0.645323
+test top30 score =0.702954
+test top50 score =0.729055
+test top100 score =0.764559
+test MAP score =0.534350
+epoch: 450 
+loss: 0.406303pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch450.pth
+test accuracy score =0.470168
+fuzzzy score =0.530788
+test top3 score =0.566993
+test top5 score =0.599857
+test top10 score =0.640728
+test top30 score =0.700385
+test top50 score =0.726971
+test top100 score =0.762397
+test MAP score =0.531366
+epoch: 455 
+loss: 0.237666pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch455.pth
+test accuracy score =0.470703
+fuzzzy score =0.531809
+test top3 score =0.568405
+test top5 score =0.601177
+test top10 score =0.642083
+test top30 score =0.700970
+test top50 score =0.726650
+test top100 score =0.762419
+test MAP score =0.532031
+epoch: 460 
+loss: 0.589902pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch460.pth
+test accuracy score =0.465501
+fuzzzy score =0.528655
+test top3 score =0.565009
+test top5 score =0.598473
+test top10 score =0.639779
+test top30 score =0.699943
+test top50 score =0.725780
+test top100 score =0.761691
+test MAP score =0.528064
+epoch: 465 
+loss: 0.465053pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch465.pth
+test accuracy score =0.459101
+fuzzzy score =0.528355
+test top3 score =0.561834
+test top5 score =0.597645
+test top10 score =0.640585
+test top30 score =0.700792
+test top50 score =0.726985
+test top100 score =0.762405
+test MAP score =0.523821
+epoch: 470 
+loss: 0.354887pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch470.pth
+test accuracy score =0.469697
+fuzzzy score =0.531331
+test top3 score =0.568940
+test top5 score =0.602968
+test top10 score =0.643289
+test top30 score =0.701812
+test top50 score =0.727920
+test top100 score =0.763732
+test MAP score =0.532136
+epoch: 475 
+loss: 0.184329pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch475.pth
+test accuracy score =0.465152
+fuzzzy score =0.525758
+test top3 score =0.563710
+test top5 score =0.598195
+test top10 score =0.639707
+test top30 score =0.697966
+test top50 score =0.724046
+test top100 score =0.760842
+test MAP score =0.527545
+epoch: 480 
+loss: 0.449565pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch480.pth
+test accuracy score =0.458887
+fuzzzy score =0.523696
+test top3 score =0.560763
+test top5 score =0.595141
+test top10 score =0.637289
+test top30 score =0.698238
+test top50 score =0.724809
+test top100 score =0.761620
+test MAP score =0.522938
+epoch: 485 
+loss: 0.195188pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch485.pth
+test accuracy score =0.467471
+fuzzzy score =0.528662
+test top3 score =0.565865
+test top5 score =0.599615
+test top10 score =0.640685
+test top30 score =0.699201
+test top50 score =0.725059
+test top100 score =0.761184
+test MAP score =0.529417
+epoch: 490 
+loss: 0.305914pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch490.pth
+test accuracy score =0.467100
+fuzzzy score =0.525815
+test top3 score =0.564210
+test top5 score =0.597438
+test top10 score =0.638380
+test top30 score =0.697424
+test top50 score =0.722711
+test top100 score =0.759108
+test MAP score =0.528422
+epoch: 495 
+loss: 0.416497pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch495.pth
+test accuracy score =0.465187
+fuzzzy score =0.527713
+test top3 score =0.564545
+test top5 score =0.598509
+test top10 score =0.639700
+test top30 score =0.699222
+test top50 score =0.725202
+test top100 score =0.761356
+test MAP score =0.527766
+epoch: 500 
+loss: 0.327404pth_embed/dataset-batch256-epoch501-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch500.pth
+test accuracy score =0.457824
+fuzzzy score =0.522340
+test top3 score =0.561077
+test top5 score =0.597096
+test top10 score =0.640014
+test top30 score =0.700792
+test top50 score =0.726151
+test top100 score =0.761855
+test MAP score =0.522763
+
+
+embedding_graph_dynamic_poi_1024.npy
+stal
+epoch: 0 
+loss: 8.610282pth_embed/dataset-batch256-epoch501-spatial_loss-dmodel1024-head2_layer2_embed9_embedding_graph_dynamic_poi_1024_20220728_epoch0.pth
+test accuracy score =0.030610
+fuzzzy score =0.082783
+test top3 score =0.054927
+test top5 score =0.073264
+test top10 score =0.106871
+test top30 score =0.190139
+test top50 score =0.251352
+test top100 score =0.356176
+test MAP score =0.057206
+epoch: 5 
+loss: 6.133442pth_embed/dataset-batch256-epoch501-spatial_loss-dmodel1024-head2_layer2_embed9_embedding_graph_dynamic_poi_1024_20220728_epoch5.pth
+test accuracy score =0.306500
+fuzzzy score =0.376903
+test top3 score =0.384509
+test top5 score =0.415227
+test top10 score =0.456133
+test top30 score =0.523553
+test top50 score =0.559265
+test top100 score =0.613193
+test MAP score =0.359371
+epoch: 10 
+loss: 4.377529pth_embed/dataset-batch256-epoch501-spatial_loss-dmodel1024-head2_layer2_embed9_embedding_graph_dynamic_poi_1024_20220728_epoch10.pth
+test accuracy score =0.355662
+fuzzzy score =0.432950
+test top3 score =0.452736
+test top5 score =0.488412
+test top10 score =0.533236
+test top30 score =0.599715
+test top50 score =0.630432
+test top100 score =0.677174
+test MAP score =0.418631
+epoch: 15 
+loss: 5.126462pth_embed/dataset-batch256-epoch501-spatial_loss-dmodel1024-head2_layer2_embed9_embedding_graph_dynamic_poi_1024_20220728_epoch15.pth
+test accuracy score =0.386764
+fuzzzy score =0.463739
+test top3 score =0.489668
+test top5 score =0.525894
+test top10 score =0.570903
+test top30 score =0.634813
+test top50 score =0.665630
+test top100 score =0.712587
+test MAP score =0.452318
+epoch: 20 
+loss: 5.181802pth_embed/dataset-batch256-epoch501-spatial_loss-dmodel1024-head2_layer2_embed9_embedding_graph_dynamic_poi_1024_20220728_epoch20.pth
+test accuracy score =0.397574
+fuzzzy score =0.487107
+test top3 score =0.504031
+test top5 score =0.542476
+test top10 score =0.588983
+test top30 score =0.654713
+test top50 score =0.685408
+test top100 score =0.730660
+test MAP score =0.465461
+epoch: 25 
+loss: 4.888657pth_embed/dataset-batch256-epoch501-spatial_loss-dmodel1024-head2_layer2_embed9_embedding_graph_dynamic_poi_1024_20220728_epoch25.pth
+test accuracy score =0.429597
+fuzzzy score =0.511209
+test top3 score =0.528084
+test top5 score =0.563967
+test top10 score =0.607014
+test top30 score =0.669197
+test top50 score =0.698359
+test top100 score =0.741513
+test MAP score =0.492493
+epoch: 30 
+loss: 4.383673pth_embed/dataset-batch256-epoch501-spatial_loss-dmodel1024-head2_layer2_embed9_embedding_graph_dynamic_poi_1024_20220728_epoch30.pth
+test accuracy score =0.443132
+fuzzzy score =0.523989
+test top3 score =0.542483
+test top5 score =0.578095
+test top10 score =0.620728
+test top30 score =0.684524
+test top50 score =0.714592
+test top100 score =0.757988
+test MAP score =0.506493
+epoch: 35 
+loss: 3.360579pth_embed/dataset-batch256-epoch501-spatial_loss-dmodel1024-head2_layer2_embed9_embedding_graph_dynamic_poi_1024_20220728_epoch35.pth
+test accuracy score =0.457339
+fuzzzy score =0.539814
+test top3 score =0.554998
+test top5 score =0.589040
+test top10 score =0.631017
+test top30 score =0.691138
+test top50 score =0.720278
+test top100 score =0.762276
+test MAP score =0.519263
+epoch: 40 
+loss: 3.932596pth_embed/dataset-batch256-epoch501-spatial_loss-dmodel1024-head2_layer2_embed9_embedding_graph_dynamic_poi_1024_20220728_epoch40.pth
+test accuracy score =0.460014
+fuzzzy score =0.544146
+test top3 score =0.562626
+test top5 score =0.598601
+test top10 score =0.640093
+test top30 score =0.699707
+test top50 score =0.728391
+test top100 score =0.771737
+test MAP score =0.524610
+
+
+
+epoch: 0 
+loss: 8.026187pth_embed/dataset-batch256-epoch101-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch0.pth
+test accuracy score =0.047799
+fuzzzy score =0.127535
+test top3 score =0.074185
+test top5 score =0.091267
+test top10 score =0.118687
+test top30 score =0.178181
+test top50 score =0.222690
+test top100 score =0.305380
+test MAP score =0.072255
+epoch: 0 
+loss: 6.949810pth_embed/dataset-batch256-epoch101-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch0.pth
+test accuracy score =0.000856
+fuzzzy score =0.010089
+test top3 score =0.002283
+test top5 score =0.003810
+test top10 score =0.008049
+test top30 score =0.024331
+test top50 score =0.041948
+test top100 score =0.086686
+test MAP score =0.004265
+epoch: 0 
+loss: 8.660031pth_embed/dataset-batch256-epoch101-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch0.pth
+test accuracy score =0.041306
+fuzzzy score =0.096190
+test top3 score =0.068270
+test top5 score =0.083589
+test top10 score =0.108969
+test top30 score =0.163118
+test top50 score =0.204053
+test top100 score =0.285166
+test MAP score =0.064996
+epoch: 5 
+loss: 3.824117pth_embed/dataset-batch256-epoch101-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch5.pth
+test accuracy score =0.413742
+fuzzzy score =0.519379
+test top3 score =0.481399
+test top5 score =0.506793
+test top10 score =0.541006
+test top30 score =0.604659
+test top50 score =0.639986
+test top100 score =0.696432
+test MAP score =0.459672
+epoch: 10 
+loss: 2.999461pth_embed/dataset-batch256-epoch101-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch10.pth
+test accuracy score =0.502975
+fuzzzy score =0.618273
+test top3 score =0.580328
+test top5 score =0.606943
+test top10 score =0.643125
+test top30 score =0.702983
+test top50 score =0.733664
+test top100 score =0.779472
+test MAP score =0.553577
+epoch: 15 
+loss: 2.726583pth_embed/dataset-batch256-epoch101-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch15.pth
+test accuracy score =0.546044
+fuzzzy score =0.664716
+test top3 score =0.630303
+test top5 score =0.658787
+test top10 score =0.693364
+test top30 score =0.747335
+test top50 score =0.774178
+test top100 score =0.814884
+test MAP score =0.599498
+epoch: 20 
+loss: 2.465883pth_embed/dataset-batch256-epoch101-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch20.pth
+test accuracy score =0.570703
+fuzzzy score =0.691638
+test top3 score =0.660029
+test top5 score =0.687770
+test top10 score =0.722019
+test top30 score =0.772615
+test top50 score =0.797417
+test top100 score =0.835055
+test MAP score =0.626105
+epoch: 25 
+loss: 2.473914pth_embed/dataset-batch256-epoch101-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch25.pth
+test accuracy score =0.587071
+fuzzzy score =0.708391
+test top3 score =0.680442
+test top5 score =0.708441
+test top10 score =0.741598
+test top30 score =0.791088
+test top50 score =0.814649
+test top100 score =0.848833
+test MAP score =0.644144
+epoch: 30 
+loss: 2.108300pth_embed/dataset-batch256-epoch101-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch30.pth
+test accuracy score =0.598544
+fuzzzy score =0.721655
+test top3 score =0.695548
+test top5 score =0.722990
+test top10 score =0.756247
+test top30 score =0.804524
+test top50 score =0.826828
+test top100 score =0.858566
+test MAP score =0.657068
+epoch: 35 
+loss: 1.873191pth_embed/dataset-batch256-epoch101-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch35.pth
+test accuracy score =0.607592
+fuzzzy score =0.731002
+test top3 score =0.706950
+test top5 score =0.735648
+test top10 score =0.768056
+test top30 score =0.815469
+test top50 score =0.837324
+test top100 score =0.868220
+test MAP score =0.667428
+epoch: 40 
+loss: 1.953622pth_embed/dataset-batch256-epoch101-loss-dmodel1024-head2_layer2_embed11_embedding_dynamic_poi_20220728_epoch40.pth
+test accuracy score =0.613907
+fuzzzy score =0.737082
+test top3 score =0.715212
+test top5 score =0.744253
+test top10 score =0.776654
+test top30 score =0.823025
+test top50 score =0.844039
+test top100 score =0.874042
+test MAP score =0.674650
+
+
+epoch: 1 
+test accuracy score =0.000813
+fuzzzy score =0.011559
+test top3 score =0.003168
+test top5 score =0.005059
+test top10 score =0.008077
+test top30 score =0.028091
+test top50 score =0.053214
+test top100 score =0.105016
+test MAP score =0.005024
+epoch: 1 
+test accuracy score =0.000821
+fuzzzy score =0.007171
+test top3 score =0.003368
+test top5 score =0.005280
+test top10 score =0.010332
+test top30 score =0.026572
+test top50 score =0.043432
+test top100 score =0.088184
+test MAP score =0.004846
+epoch: 1 
+test accuracy score =0.001741
+fuzzzy score =0.012594
+test top3 score =0.004567
+test top5 score =0.005951
+test top10 score =0.008862
+test top30 score =0.024716
+test top50 score =0.049212
+test top100 score =0.104410
+test MAP score =0.005788
