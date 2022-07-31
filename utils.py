@@ -67,6 +67,18 @@ def topk(ground_truth, logits_lm, k):
     return topk_token, topk_score
 
 
+def map_score(ground_truth, logits_lm):
+    MAP = 0
+    pred_topk = torch.flatten(logits_lm, start_dim=0, end_dim=1).cpu().data.numpy()
+    for i in range(len(ground_truth)):
+        if ground_truth[i] in pred_topk[i]:
+            a = ground_truth[i]
+            b = pred_topk[i]
+            rank = np.argwhere(ground_truth[i] == pred_topk[i]) + 1
+            MAP += 1.0 / rank[0][0]
+    return MAP / len(ground_truth)
+
+
 def get_evalution(ground_truth, logits_lm, exchange_matrix):
     pred_acc = logits_lm[:, :, 0]
     pred_acc = pred_acc.flatten().cpu().data.numpy()
@@ -74,20 +86,20 @@ def get_evalution(ground_truth, logits_lm, exchange_matrix):
     for i in range(len(ground_truth)):
         if pred_acc[i] == ground_truth[i]:
             accuracy_token += 1
-    print("accuracy:", accuracy_token, accuracy_token / len(ground_truth))
     accuracy_score = accuracy_token / len(ground_truth)
+    print("top1:", accuracy_token, accuracy_score)
 
     pred_acc = logits_lm[:, :, 0]
     pred_acc = pred_acc.flatten().cpu().data.numpy()
 
-    funzzy_accuracy_token = 0
+    fuzzy_accuracy_token = 0
     for i in range(len(pred_acc)):
         a = int(pred_acc[i])
         b = ground_truth[i]
-        if exchange_matrix[b][a] > 0:
-            funzzy_accuracy_token += 1
-    print("fuzzy:", funzzy_accuracy_token, funzzy_accuracy_token / len(ground_truth))
-    fuzzzy_score = funzzy_accuracy_token / len(ground_truth)
+        if exchange_matrix[b][a] > 0 or exchange_matrix[a][b] > 0:
+            fuzzy_accuracy_token += 1
+    fuzzy_score = fuzzy_accuracy_token / len(ground_truth)
+    print("fuzzy:", fuzzy_accuracy_token, fuzzy_score)
 
     top3_token, top3_score = topk(ground_truth, logits_lm, 3)
     print("top3:", top3_token, top3_score)
@@ -107,18 +119,20 @@ def get_evalution(ground_truth, logits_lm, exchange_matrix):
     top100_token, top100_score = topk(ground_truth, logits_lm, 100)
     print("top100:", top100_token, top100_score)
 
-    return accuracy_score, fuzzzy_score, top3_score, top5_score, top10_score, top30_score, top50_score, top100_score
+    MAP = map_score(ground_truth, logits_lm)
+    print("MAP score:", MAP)
+
+    return accuracy_score, fuzzy_score, top3_score, top5_score, top10_score, top30_score, top50_score, top100_score, MAP
 
 
 class Loss_Function(nn.Module):
     def __init__(self):
         super(Loss_Function, self).__init__()
 
-    def Spatial_Loss(self, weight, logit_lm, ground_truth):
+    def Spatial_Loss(self, weight, logit_lm, ground_truth):  # STAL loss function
         _, num_classes = logit_lm.size()
         p_i = torch.softmax(logit_lm, dim=1)
-        spatial_matrix = torch.index_select(weight, 0, ground_truth)
-
+        spatial_matrix = torch.index_select(weight, 0, ground_truth)  # select value by index
         loss = spatial_matrix * torch.log(p_i + 0.0000001)
         loss = torch.sum(loss, dim=1)
         loss = -torch.mean(loss, dim=0)
@@ -135,50 +149,28 @@ class Loss_Function(nn.Module):
 
 
 def make_exchange_matrix(token_list, token_size, alpha=98, theta=1000):
-    token_list = [list(filter(lambda x: x > 3, token)) for token in token_list]
+    token_list = [list(filter(lambda x: x > 3, token)) for token in token_list]  # 去掉pad mask等字符
     exchange_matrix = np.zeros(shape=(token_size, token_size))
     for token in token_list:
         for i in range(1, len(token)):
             if token[i] == token[i - 1]:
                 continue
-            exchange_matrix[token[i - 1]][token[i]] += 1
+            exchange_matrix[token[i - 1]][token[i]] += 1  # 按照轨迹的方向统计
     print(np.min(exchange_matrix), np.max(exchange_matrix))
-    exchange_matrix = np.where(exchange_matrix >= alpha, exchange_matrix, 0)
-    exchange_matrix = exchange_matrix / theta
-    exchange_matrix = np.where(exchange_matrix > 0, np.exp(exchange_matrix), 0)
+    exchange_matrix = np.where(exchange_matrix >= alpha, exchange_matrix, 0)  # 大于alpha的作为临近基站
+    exchange_matrix = exchange_matrix / theta  # 做theta缩放
+    exchange_matrix = np.where(exchange_matrix > 0, np.exp(exchange_matrix), 0)  # exp(x)
     print(np.min(exchange_matrix), np.max(exchange_matrix))
     for i in range(token_size):
         row_sum = sum(exchange_matrix[i]) + np.exp(1)
         for j in range(token_size):
             if exchange_matrix[i][j] != 0:
-                exchange_matrix[i][j] = exchange_matrix[i][j] / row_sum
+                exchange_matrix[i][j] = exchange_matrix[i][j] / row_sum  # 除对角元素外softmax
     print(np.min(exchange_matrix), np.max(exchange_matrix))
     for i in range(token_size):
-        exchange_matrix[i][i] = 1
+        exchange_matrix[i][i] = 1  # 对角元素置1
     return exchange_matrix
 
 
 if __name__ == '__main__':
-    # x = np.random.random((2, 4, 3))
-    # y = np.random.randint(low=0, high=3, size=[2, 4])
-    # weight = np.array([[1, 1, 2], [2, 4, 8], [3, 2, 0]])
-    #
-    # x = torch.Tensor(x).cuda()
-    # y = torch.LongTensor(y).cuda()
-    # weight = torch.Tensor(weight).cuda()
-    #
-    # _, _, vocab_size = x.size()
-    # loss_f = Loss_Function()
-    # loss = nn.CrossEntropyLoss()
-    # a, b = x.view(-1, vocab_size), y.view(-1)
-    # loss_cross = loss(a, b)
-    # print(loss_cross)
-    # print(loss_f.Cross_Entropy_Loss(a, b))
-    #
-    # spatial_loss = loss_f.Spatial_Loss(weight, a, b)
-    # print(spatial_loss)
-    # token_list = [[1, 0, 5, 3, 6, 0, 9],
-    #               [5, 0, 0, 0, 6, 5, 0, 1],
-    #               [1, 5, 7, 0, 5, 3, 6]]
-    # make_exchange_matrix(token_list, 10)
     pass
