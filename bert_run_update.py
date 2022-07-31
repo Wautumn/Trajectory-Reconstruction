@@ -98,8 +98,8 @@ def make_train_data(token_list):
         input_ids = [word2idx['[CLS]']] + tokens_a + [word2idx['[SEP]']]
 
         # MASK LM
-        n_pred = max_pred
-        # n_pred = min(max_pred, max(1, int(len(input_ids) * 0.15)))  # 15 % of tokens in one sentence
+        # n_pred = max_pred
+        n_pred = min(max_pred, max(1, int(len(input_ids) * 0.15)))  # 15 % of tokens in one sentence
         cand_maked_pos = [i for i, token in enumerate(input_ids)
                           if token != word2idx['[CLS]'] and token != word2idx['[SEP]'] and token != word2idx[
                               '[PAD]']]  # candidate masked position
