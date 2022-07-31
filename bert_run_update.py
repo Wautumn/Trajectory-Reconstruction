@@ -74,7 +74,7 @@ for i, w in enumerate(word_list):
         word2idx[w] = i + 4
 
 idx2word = {i: w for i, w in enumerate(word2idx)}
-vocab_size = len(word2idx) + 2
+vocab_size = len(word2idx)
 
 train_token_list = list()
 train_user_list = list()
@@ -193,6 +193,7 @@ for epoch in range(epoch_size):
         loss.backward()
         optimizer.step()
 
+
 torch.save({'model': model.state_dict()},
            pth_dic + '/data-%s-%s-batch%s-epoch%s-%s-%s.pth' % (
                args.train_dataset, args.test_dataset, batch_size, epoch_size, loss_fun,
@@ -222,10 +223,16 @@ def test(test_token_list, test_masked_tokens, test_masked_pos, test_user_ids, te
         logits_lm = torch.topk(logits_lm, 100, dim=2)[1]
         predict_prob = torch.cat([predict_prob, logits_lm], dim=0)
 
-    accuracy_score, fuzzzy_score, top3_score, top5_score, top10_score, top30_score, top50_score, top100_score, map_score = get_evalution(
+    ground_truth_origin = [str(idx2word[s]) for s in masked_tokens]
+    predict_loc = predict_prob[:, :, 0].flatten().cpu().data.numpy()
+    predict_loc_origin = [str(idx2word[s]) for s in predict_loc]
+    wirte_csv(ground_truth_origin, 'ground_truth_origin_%s_%s_%s' % (args.train_dataset, args.test_dataset, loss_fun))
+    wirte_csv(predict_loc_origin, 'predict_loc_origin_%s_%s_%s' % (args.train_dataset, args.test_dataset, loss_fun))
+
+    accuracy_score, fuzzy_score, top3_score, top5_score, top10_score, top30_score, top50_score, top100_score, map_score = get_evalution(
         ground_truth=masked_tokens, logits_lm=predict_prob, exchange_matrix=exchange_map)
 
-    print('fuzzy score =', '{:.6f}'.format(fuzzzy_score))
+    print('fuzzy score =', '{:.6f}'.format(fuzzy_score))
     print('test top1 score =', '{:.6f}'.format(accuracy_score))
     print('test top3 score =', '{:.6f}'.format(top3_score))
     print('test top5 score =', '{:.6f}'.format(top5_score))
@@ -234,6 +241,14 @@ def test(test_token_list, test_masked_tokens, test_masked_pos, test_user_ids, te
     print('test top50 score =', '{:.6f}'.format(top50_score))
     print('test top100 score =', '{:.6f}'.format(top100_score))
     print('test map score =', '{:.6f}'.format(map_score))
+
+
+def wirte_csv(token_list, csv_name):
+    import csv
+    token_list = [[token_list[i]] for i in range(len(token_list))]
+    with open("csv_file/" + csv_name + ".csv", "w") as csvfile:
+        writer = csv.writer(csvfile, lineterminator='\n')
+        writer.writerows(token_list)
 
 
 test(test_input_ids, test_masked_tokens, test_masked_pos, test_user_ids, test_day_ids)
