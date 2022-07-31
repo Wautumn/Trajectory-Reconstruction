@@ -169,6 +169,10 @@ def make_exchange_matrix(token_list, token_size, alpha=98, theta=1000):
     print(np.min(exchange_matrix), np.max(exchange_matrix))
     for i in range(token_size):
         exchange_matrix[i][i] = 1  # 对角元素置1
+
+    for i in range(token_size):
+        for j in range(token_size):
+            exchange_matrix[i][j] = max(exchange_matrix[i][j], exchange_matrix[j][i])
     return exchange_matrix
 
 
